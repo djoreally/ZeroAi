@@ -11,6 +11,7 @@
     "CERT-001"
   ],
   "allowedPaths": [
+    "bin/**",
     "packages/cli/**",
     "src/runtime/**",
     "src/lib/**",
@@ -41,27 +42,42 @@
     {
       "id": "R1-AC-001",
       "description": "Running zeroai inside a Git repository starts an interactive ZeroAI session bound to that repository and workspace.",
-      "evidence": ["CLI integration test", "process exit status", "captured terminal transcript"]
+      "evidence": [
+        "CLI integration test",
+        "process exit status",
+        "captured terminal transcript"
+      ]
     },
     {
       "id": "R1-AC-002",
       "description": "A natural-language prompt is intercepted and compiled into a typed execution intent before any provider adapter is invoked.",
-      "evidence": ["unit test proving interceptor precedes provider invocation", "execution trace"]
+      "evidence": [
+        "unit test proving interceptor precedes provider invocation",
+        "execution trace"
+      ]
     },
     {
       "id": "R1-AC-003",
       "description": "Provider/BYOK configuration resolves through secure credential references and does not persist plaintext provider secrets in the repository.",
-      "evidence": ["credential-storage test", "repository secret scan"]
+      "evidence": [
+        "credential-storage test",
+        "repository secret scan"
+      ]
     },
     {
       "id": "R1-AC-004",
       "description": "Only ZeroAI-authorized repo, memory, workspace, and policy context is present in the provider request envelope.",
-      "evidence": ["context-envelope contract test", "provider-adapter fixture"]
+      "evidence": [
+        "context-envelope contract test",
+        "provider-adapter fixture"
+      ]
     },
     {
       "id": "R1-AC-005",
       "description": "Existing architecture certification, typecheck, tests, and production build remain green.",
-      "evidence": ["GitHub Actions zeroai-certification"]
+      "evidence": [
+        "GitHub Actions zeroai-certification"
+      ]
     }
   ],
   "prohibitedChanges": [
