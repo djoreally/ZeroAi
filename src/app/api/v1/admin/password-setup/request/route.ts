@@ -1,5 +1,8 @@
 export async function POST(request:Request){
-  const expected=process.env.ZEROAI_PLATFORM_ADMIN_EMAIL?.trim().toLowerCase();
+  const expected=(
+    process.env.ZEROAI_PLATFORM_ADMIN_EMAIL ??
+    process.env.ZEROAI_PLATFORM_ADMIN
+  )?.trim().toLowerCase();
   const baseUrl=process.env.NEON_AUTH_BASE_URL;
   const appUrl=process.env.ZEROAI_APP_URL;
 
