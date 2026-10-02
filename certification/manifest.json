@@ -26,7 +26,8 @@
     "VERIFIED",
     "PARTIAL",
     "UNKNOWN",
-    "FAILED"
+    "FAILED",
+    "BLOCKED_INFRASTRUCTURE"
   ],
-  "rule": "A required gate that does not produce passing evidence prevents certification."
+  "rule": "A required gate must be VERIFIED for certification. BLOCKED_INFRASTRUCTURE is not a product failure, but it still prevents full certification until equivalent deterministic evidence is recorded or the gate becomes available."
 }
