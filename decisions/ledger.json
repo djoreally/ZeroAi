@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "decisions": [
+    {
+      "id": "DEC-0001",
+      "status": "active",
+      "decision": "Treat LLMs as nondeterministic workers, never as system authority.",
+      "supersedes": null,
+      "requirements": [
+        "ARCH-001",
+        "CERT-001"
+      ]
+    },
+    {
+      "id": "DEC-0002",
+      "status": "active",
+      "decision": "Use AgentPhone exclusively for telephony; do not introduce Twilio.",
+      "supersedes": null,
+      "requirements": [
+        "TEL-001"
+      ]
+    },
+    {
+      "id": "DEC-0003",
+      "status": "active",
+      "decision": "Use AgentMail exclusively for application email.",
+      "supersedes": null,
+      "requirements": [
+        "MAIL-001"
+      ]
+    },
+    {
+      "id": "DEC-0004",
+      "status": "active",
+      "decision": "Use Neon Data API as the only application database access path.",
+      "supersedes": null,
+      "requirements": [
+        "DB-001"
+      ]
+    },
+    {
+      "id": "DEC-0005",
+      "status": "active",
+      "decision": "All engineering work is bounded by machine-readable change contracts and drift certification.",
+      "supersedes": null,
+      "requirements": [
+        "SCOPE-001",
+        "CERT-001"
+      ]
+    },
+    {
+      "id": "DEC-0006",
+      "status": "active",
+      "decision": "Production deployment is triggered only by merging to main.",
+      "supersedes": null,
+      "requirements": [
+        "REL-001"
+      ]
+    },
+    {
+      "id": "DEC-0007",
+      "status": "active",
+      "decision": "Build ZeroAI as the deterministic control plane between the developer and the user's chosen AI provider, following contracts/runtime-plan.json in milestone order R1 through R4.",
+      "supersedes": null,
+      "requirements": [
+        "ARCH-001",
+        "INT-001",
+        "CTX-001",
+        "ACT-001",
+        "AUTH-001",
+        "ISO-001",
+        "EVID-001",
+        "COMMIT-001",
+        "CLI-001",
+        "BYOK-001",
+        "RUNTIME-001"
+      ]
+    }
+  ]
+}

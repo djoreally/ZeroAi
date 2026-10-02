@@ -7,7 +7,8 @@ import type {
   ExecutionRecord,
   MemoryFactRecord,
   StateRecord,
-  Workspace
+  Workspace,
+  WorkspaceMembership
 } from "./domain";
 import type { ZeroStore } from "./store";
 
@@ -21,6 +22,9 @@ function fail(error:any):never {
 
 function workspace(row:Row):Workspace {
   return {id:row.id,slug:row.slug,name:row.name,status:row.status,createdAt:row.created_at,updatedAt:row.updated_at};
+}
+function workspaceMembership(row:Row):WorkspaceMembership {
+  return {workspaceId:row.workspace_id,authUserId:row.auth_user_id,role:row.role,status:row.status,createdAt:row.created_at,updatedAt:row.updated_at};
 }
 function apiKey(row:Row):ApiKeyRecord {
   return {id:row.id,workspaceId:row.workspace_id,name:row.name,prefix:row.prefix,secretHash:row.secret_hash,scopes:row.scopes ?? [],createdAt:row.created_at,lastUsedAt:row.last_used_at ?? undefined,revokedAt:row.revoked_at ?? undefined};
@@ -73,6 +77,30 @@ export class NeonDataApiZeroStore implements ZeroStore {
     const {data,error}=await this.client.from("zero_workspaces").select("*").eq("slug",slug).maybeSingle();
     if(error) fail(error);
     return data ? workspace(data) : null;
+  }
+
+  async listWorkspaceMembershipsForUser(authUserId:string){
+    const {data,error}=await this.client.from("zero_workspace_memberships").select("*").eq("auth_user_id",authUserId).eq("status","active").order("created_at",{ascending:true});
+    if(error) fail(error);
+    return (data ?? []).map(workspaceMembership);
+  }
+
+  async getWorkspaceMembership(workspaceId:string,authUserId:string){
+    const {data,error}=await this.client.from("zero_workspace_memberships").select("*").eq("workspace_id",workspaceId).eq("auth_user_id",authUserId).maybeSingle();
+    if(error) fail(error);
+    return data ? workspaceMembership(data) : null;
+  }
+
+  async createWorkspaceMembership(value:WorkspaceMembership){
+    const {error}=await this.client.from("zero_workspace_memberships").insert({
+      workspace_id:value.workspaceId,
+      auth_user_id:value.authUserId,
+      role:value.role,
+      status:value.status,
+      created_at:value.createdAt,
+      updated_at:value.updatedAt
+    });
+    if(error) fail(error);
   }
 
   async createApiKey(value:ApiKeyRecord){

@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "gates": [
+    {
+      "id": "ARCH-CONTRACT",
+      "command": "node scripts/zeroai-certify.mjs",
+      "required": true
+    },
+    {
+      "id": "TYPECHECK",
+      "command": "npm run typecheck",
+      "required": true
+    },
+    {
+      "id": "TESTS",
+      "command": "npm test",
+      "required": true
+    },
+    {
+      "id": "BUILD",
+      "command": "npm run build",
+      "required": true
+    }
+  ],
+  "evidenceStates": [
+    "VERIFIED",
+    "PARTIAL",
+    "UNKNOWN",
+    "FAILED",
+    "BLOCKED_INFRASTRUCTURE"
+  ],
+  "rule": "A required gate must be VERIFIED for certification. BLOCKED_INFRASTRUCTURE is not a product failure, but it still prevents full certification until equivalent deterministic evidence is recorded or the gate becomes available."
+}

@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "id": "ZERO-RUNTIME-V1",
+  "goal": "Deliver ZeroAI as the deterministic control plane between a developer and their chosen AI provider.",
+  "entrypoint": "zeroai",
+  "acceptanceCommand": "zeroai > fix this bug",
+  "lifecycle": [
+    "INTERCEPT",
+    "CONTEXT_RESOLVE",
+    "PROVIDER_ROUTE",
+    "PLAN",
+    "AUTHORIZE",
+    "ISOLATED_EXECUTE",
+    "VERIFY",
+    "CERTIFY",
+    "ATOMIC_COMMIT",
+    "MEMORY_UPDATE",
+    "RESPOND"
+  ],
+  "milestones": [
+    {
+      "id": "R1",
+      "name": "Interception",
+      "order": 1,
+      "requirements": ["CLI-001", "BYOK-001", "INT-001", "CTX-001"],
+      "deliverables": [
+        "Interactive @zeroai/cli entrypoint",
+        "Login and workspace binding",
+        "Provider/BYOK registry",
+        "ZeroIntercept",
+        "Intent Compiler",
+        "Authorized context envelope"
+      ],
+      "exitCriteria": [
+        "Every prompt is intercepted before provider dispatch",
+        "Provider credentials are referenced securely and are not stored in repo plaintext",
+        "The provider receives only context authorized by ZeroAI"
+      ]
+    },
+    {
+      "id": "R2",
+      "name": "Controlled Execution",
+      "order": 2,
+      "requirements": ["ACT-001", "AUTH-001", "ISO-001"],
+      "deliverables": [
+        "Structured ZeroAction protocol",
+        "Capability registry",
+        "Execution authority engine",
+        "Git-worktree isolation",
+        "Tool executor",
+        "Base-SHA concurrency check"
+      ],
+      "exitCriteria": [
+        "Models propose actions but cannot directly execute tools",
+        "Every action is authorized or denied deterministically",
+        "Mutating work occurs outside the user's active checkout"
+      ]
+    },
+    {
+      "id": "R3",
+      "name": "Trust",
+      "order": 3,
+      "requirements": ["CERT-001", "EVID-001", "COMMIT-001", "MEM-001"],
+      "deliverables": [
+        "Deterministic evidence collector",
+        "Repository-aware certification manifest",
+        "Evidence hashing and chain-of-custody",
+        "Atomic certified state commit",
+        "Certified ZeroMemory update"
+      ],
+      "exitCriteria": [
+        "Certification is based on deterministic evidence and never model self-judgment",
+        "Failed work cannot update trusted state or ZeroMemory",
+        "Certified changes are conflict-checked before commit"
+      ]
+    },
+    {
+      "id": "R4",
+      "name": "Full ZeroAI Experience",
+      "order": 4,
+      "requirements": ["RUNTIME-001"],
+      "deliverables": [
+        "Interactive streaming shell",
+        "Retry and replan loop",
+        "/model /status /diff /evidence /certify /rollback commands",
+        "Multi-model routing",
+        "Console visibility for executions"
+      ],
+      "exitCriteria": [
+        "A developer can cd into a repo, run zeroai, type a natural-language bug request, and receive an evidenced certified result",
+        "The full lifecycle is persisted under one execution ID",
+        "The user's active checkout is never endangered by uncertified work"
+      ]
+    }
+  ],
+  "nonNegotiableInvariants": [
+    "ZeroAI owns authority; models provide cognition only.",
+    "The model cannot execute OS, Git, database, browser, network, deployment, or external-tool operations directly.",
+    "The model cannot decide what context it is allowed to see.",
+    "All mutating code work is isolated before certification.",
+    "Certification is deterministic and cannot be self-issued by the model or executor.",
+    "Only certified results may update trusted state or ZeroMemory.",
+    "The user working tree must not be reset, cleaned, or destructively rolled back.",
+    "State commit must detect repository drift from the recorded base SHA.",
+    "No later milestone may be marked complete while an earlier milestone exit criterion is unverified."
+  ],
+  "definitionOfDone": [
+    "Prompt intercepted",
+    "Authorized context resolved",
+    "Provider selected through BYOK/provider registry",
+    "Model returned structured proposed actions",
+    "Every action passed deterministic authority",
+    "Mutations executed in isolation",
+    "Repository-specific verification completed",
+    "Evidence captured and hashed",
+    "Certification passed",
+    "Base SHA conflict check passed",
+    "Certified change committed atomically",
+    "ZeroMemory updated from certified result only",
+    "Final result returned with execution and evidence identifiers"
+  ]
+}

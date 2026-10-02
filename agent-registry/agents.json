@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "agents": [
+    {
+      "id": "planner",
+      "mayModify": false,
+      "responsibilities": [
+        "translate intent into requirement-linked task graph",
+        "declare change contract"
+      ]
+    },
+    {
+      "id": "engineer",
+      "mayModify": true,
+      "responsibilities": [
+        "modify only allowed paths",
+        "produce implementation evidence"
+      ]
+    },
+    {
+      "id": "reviewer",
+      "mayModify": false,
+      "responsibilities": [
+        "review requirement compliance",
+        "identify undeclared blast radius"
+      ]
+    },
+    {
+      "id": "certifier",
+      "mayModify": false,
+      "responsibilities": [
+        "run deterministic gates",
+        "persist VERIFIED/PARTIAL/UNKNOWN/FAILED evidence"
+      ]
+    },
+    {
+      "id": "release",
+      "mayModify": false,
+      "responsibilities": [
+        "observe certification and release eligibility"
+      ],
+      "restrictions": [
+        "cannot override failed gates",
+        "cannot directly deploy"
+      ]
+    }
+  ]
+}

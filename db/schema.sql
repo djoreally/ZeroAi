@@ -152,7 +152,7 @@ create table if not exists zero_evidence (
   workspace_id uuid not null references zero_workspaces(id) on delete cascade,
   execution_id uuid not null references zero_executions(id) on delete cascade,
   type text not null,
-  state text not null check (state in ('VERIFIED','PARTIAL','UNKNOWN','FAILED')),
+  state text not null check (state in ('VERIFIED','PARTIAL','UNKNOWN','FAILED','BLOCKED_INFRASTRUCTURE')),
   artifact_hash text,
   payload jsonb not null,
   created_at timestamptz not null
@@ -163,7 +163,7 @@ create table if not exists zero_certifications (
   workspace_id uuid not null references zero_workspaces(id) on delete cascade,
   execution_id uuid not null references zero_executions(id) on delete cascade,
   requirement_id text not null,
-  state text not null check (state in ('VERIFIED','PARTIAL','UNKNOWN','FAILED')),
+  state text not null check (state in ('VERIFIED','PARTIAL','UNKNOWN','FAILED','BLOCKED_INFRASTRUCTURE')),
   evidence_ids jsonb not null,
   created_at timestamptz not null
 );

@@ -7,6 +7,15 @@ export type Workspace = {
   updatedAt:string;
 };
 
+export type WorkspaceMembership = {
+  workspaceId:string;
+  authUserId:string;
+  role:"owner"|"admin"|"member"|"viewer";
+  status:"active"|"invited"|"suspended";
+  createdAt:string;
+  updatedAt:string;
+};
+
 export type ApiKeyRecord = {
   id:string;
   workspaceId:string;
@@ -76,7 +85,7 @@ export type EvidenceRecord = {
   workspaceId:string;
   executionId:string;
   type:string;
-  state:"VERIFIED"|"PARTIAL"|"UNKNOWN"|"FAILED";
+  state:"VERIFIED"|"PARTIAL"|"UNKNOWN"|"FAILED"|"BLOCKED_INFRASTRUCTURE"|"BLOCKED_INFRASTRUCTURE";
   artifactHash?:string;
   payload:unknown;
   createdAt:string;

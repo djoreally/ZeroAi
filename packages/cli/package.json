@@ -1,0 +1,16 @@
+{
+  "name": "@zeroai/cli",
+  "version": "0.1.0",
+  "description": "ZeroAI control-plane CLI",
+  "type": "module",
+  "bin": {
+    "zeroai": "bin/zeroai.mjs"
+  },
+  "files": [
+    "bin/zeroai.mjs"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "license": "UNLICENSED"
+}

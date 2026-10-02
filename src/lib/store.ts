@@ -6,13 +6,17 @@ import type {
   ExecutionRecord,
   MemoryFactRecord,
   StateRecord,
-  Workspace
+  Workspace,
+  WorkspaceMembership
 } from "./domain";
 
 export interface ZeroStore {
   createWorkspace(workspace:Workspace):Promise<void>;
   getWorkspace(id:string):Promise<Workspace|null>;
   getWorkspaceBySlug(slug:string):Promise<Workspace|null>;
+  listWorkspaceMembershipsForUser(authUserId:string):Promise<WorkspaceMembership[]>;
+  getWorkspaceMembership(workspaceId:string,authUserId:string):Promise<WorkspaceMembership|null>;
+  createWorkspaceMembership(membership:WorkspaceMembership):Promise<void>;
 
   createApiKey(record:ApiKeyRecord):Promise<void>;
   findApiKeyByPrefix(prefix:string):Promise<ApiKeyRecord|null>;
