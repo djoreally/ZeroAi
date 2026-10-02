@@ -1,12 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { ProviderBindingRecordSchema } from "./provider-binding";
+import { ConnectProviderRequestSchema, ProviderBindingRecordSchema } from "./provider-binding";
 
 describe("R1 provider binding",()=>{
-  it("accepts an OpenAI binding using only a credential reference",()=>{
+  it("accepts an OpenAI local binding using only a credential reference",()=>{
     const result=ProviderBindingRecordSchema.safeParse({
       provider:"openai",
       model:"gpt-test",
       credentialRef:{type:"env",name:"OPENAI_API_KEY"}
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts an encrypted-vault binding without exposing a raw secret",()=>{
+    const result=ProviderBindingRecordSchema.safeParse({
+      provider:"anthropic",
+      model:"claude-test",
+      credentialRef:{type:"vault",id:"primary"}
     });
     expect(result.success).toBe(true);
   });
@@ -19,7 +28,7 @@ describe("R1 provider binding",()=>{
     expect(result.success).toBe(false);
   });
 
-  it("does not define any field for a raw API secret",()=>{
+  it("does not define any field for a raw API secret in stored bindings",()=>{
     const result=ProviderBindingRecordSchema.parse({
       provider:"openai",
       model:"gpt-test",
@@ -27,6 +36,21 @@ describe("R1 provider binding",()=>{
       apiKey:"sk-secret"
     });
     expect("apiKey" in result).toBe(false);
+  });
+
+  it("requires an API key only for cloud connect requests",()=>{
+    expect(ConnectProviderRequestSchema.safeParse({
+      provider:"openai",
+      model:"gpt-test",
+      mode:"cloud"
+    }).success).toBe(false);
+
+    expect(ConnectProviderRequestSchema.safeParse({
+      provider:"openai",
+      model:"gpt-test",
+      mode:"cloud",
+      apiKey:"secret-value"
+    }).success).toBe(true);
   });
 
   it("rejects custom base URLs for first-party hosted providers",()=>{
