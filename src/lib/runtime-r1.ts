@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { ProviderId } from "./provider-registry";
 
-export const ProviderIdSchema=z.enum(["openai","anthropic","ollama","custom"]);
+export const ProviderIdSchema=ProviderId;
 export const CredentialRefSchema=z.object({
   type:z.literal("env"),
   name:z.string().regex(/^[A-Z][A-Z0-9_]*$/)
