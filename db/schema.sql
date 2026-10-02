@@ -184,4 +184,7 @@ revoke all on table
 from anonymous;
 
 revoke all on function zero_put_state(uuid,text,jsonb,text,bigint,timestamptz)
-from anonymous;
+from public;
+
+grant execute on function zero_put_state(uuid,text,jsonb,text,bigint,timestamptz)
+to zeroai_service;
