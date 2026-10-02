@@ -6,13 +6,15 @@ import type {
   ExecutionRecord,
   MemoryFactRecord,
   StateRecord,
-  Workspace
+  Workspace,
+  WorkspaceMembership
 } from "./domain";
 import type { ZeroStore } from "./store";
 
 export class MemoryZeroStore implements ZeroStore {
   private workspaces=new Map<string,Workspace>();
   private apiKeys=new Map<string,ApiKeyRecord>();
+  private workspaceMemberships=new Map<string,WorkspaceMembership>();
   private state=new Map<string,StateRecord>();
   private events:EventRecord[]=[];
   private memoryFacts=new Map<string,MemoryFactRecord>();
@@ -23,6 +25,12 @@ export class MemoryZeroStore implements ZeroStore {
   async createWorkspace(workspace:Workspace){this.workspaces.set(workspace.id,workspace);}
   async getWorkspace(id:string){return this.workspaces.get(id) ?? null;}
   async getWorkspaceBySlug(slug:string){return [...this.workspaces.values()].find(w=>w.slug===slug) ?? null;}
+  async listWorkspaceMembershipsForUser(authUserId:string){
+    return [...this.workspaceMemberships.values()].filter(m=>m.authUserId===authUserId && m.status==="active");
+  }
+  async getWorkspaceMembership(workspaceId:string,authUserId:string){
+    return this.workspaceMemberships.get(`${workspaceId}:${authUserId}`) ?? null;
+  }
 
   async createApiKey(record:ApiKeyRecord){this.apiKeys.set(record.id,record);}
   async findApiKeyByPrefix(prefix:string){return [...this.apiKeys.values()].find(k=>k.prefix===prefix && !k.revokedAt) ?? null;}
