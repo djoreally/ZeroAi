@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { certify } from "../../../../../lib/cert";
-import { appendWorkspaceEvent } from "../../../../../lib/event-service";
-import { hashObject } from "../../../../../lib/hash";
-import { getStore } from "../../../../../lib/runtime-store";
-import { newWorkspace } from "../../../../../lib/workspaces";
+import { certify } from "../../../../../../lib/cert";
+import { appendWorkspaceEvent } from "../../../../../../lib/event-service";
+import { hashObject } from "../../../../../../lib/hash";
+import { getStore } from "../../../../../../lib/runtime-store";
+import { newWorkspace } from "../../../../../../lib/workspaces";
 
 function isAdmin(request:Request){
   const expected=process.env.ZEROAI_ADMIN_TOKEN;
