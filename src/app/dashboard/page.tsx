@@ -46,8 +46,18 @@ export default function DashboardPage(){
         if(!response.ok) throw new Error(body.error ?? "Unable to load workspaces.");
         return body;
       })
-      .then(body=>{
-        const items=(body.workspaces ?? []) as WorkspaceItem[];
+      .then(async body=>{
+        let items=(body.workspaces ?? []) as WorkspaceItem[];
+        if(items.length===0){
+          const bootstrapResponse=await fetch("/api/v1/me/bootstrap",{method:"POST"});
+          const bootstrapBody=await bootstrapResponse.json();
+          if(!bootstrapResponse.ok) throw new Error(bootstrapBody.error ?? "Unable to create workspace.");
+          items=[{
+            workspace:bootstrapBody.workspace,
+            role:bootstrapBody.membership.role,
+            status:bootstrapBody.membership.status
+          }];
+        }
         setWorkspaces(items);
         if(items[0]) setWorkspaceId(items[0].workspace.id);
       })
