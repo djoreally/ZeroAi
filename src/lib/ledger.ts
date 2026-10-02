@@ -1,4 +1,4 @@
-import { hashObject, signHash } from "@/lib/hash";
+import { hashObject, signHash } from "./hash";
 
 export type LedgerEventInput = {
   eventId:string;
