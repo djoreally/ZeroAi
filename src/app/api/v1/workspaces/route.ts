@@ -7,8 +7,15 @@ const Body=z.object({
   slug:z.string().regex(/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/)
 });
 
+function isAdmin(request:Request){
+  const expected=process.env.ZEROAI_ADMIN_TOKEN;
+  const header=request.headers.get("authorization");
+  return Boolean(expected && header===`Bearer ${expected}`);
+}
+
 export async function POST(request:Request) {
   try {
+    if(!isAdmin(request)) return Response.json({error:"UNAUTHORIZED"},{status:401});
     const parsed=Body.safeParse(await request.json());
     if(!parsed.success) return Response.json({error:"INVALID_REQUEST",issues:parsed.error.issues},{status:422});
     const store=getStore();
