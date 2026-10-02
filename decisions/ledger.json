@@ -56,6 +56,25 @@
       "requirements": [
         "REL-001"
       ]
+    },
+    {
+      "id": "DEC-0007",
+      "status": "active",
+      "decision": "Build ZeroAI as the deterministic control plane between the developer and the user's chosen AI provider, following contracts/runtime-plan.json in milestone order R1 through R4.",
+      "supersedes": null,
+      "requirements": [
+        "ARCH-001",
+        "INT-001",
+        "CTX-001",
+        "ACT-001",
+        "AUTH-001",
+        "ISO-001",
+        "EVID-001",
+        "COMMIT-001",
+        "CLI-001",
+        "BYOK-001",
+        "RUNTIME-001"
+      ]
     }
   ]
 }
