@@ -71,14 +71,6 @@ export async function PUT(request:Request){
 
     const current=await access.store.getState(workspaceId,PROVIDER_BINDING_STATE_KEY);
     const now=new Date().toISOString();
-    await access.store.putState({
-      workspaceId,
-      key:PROVIDER_BINDING_STATE_KEY,
-      version:(current?.version ?? 0)+1,
-      value:validBinding,
-      valueHash:hashObject(validBinding),
-      updatedAt:now
-    },current?.version ?? 0);
 
     if(provider!=="ollama" && mode==="cloud"){
       const encrypted=encryptProviderSecret(apiKey!);
@@ -92,6 +84,15 @@ export async function PUT(request:Request){
         updatedAt:now
       },currentSecret?.version ?? 0);
     }
+
+    await access.store.putState({
+      workspaceId,
+      key:PROVIDER_BINDING_STATE_KEY,
+      version:(current?.version ?? 0)+1,
+      value:validBinding,
+      valueHash:hashObject(validBinding),
+      updatedAt:now
+    },current?.version ?? 0);
 
     return Response.json({
       binding:{
