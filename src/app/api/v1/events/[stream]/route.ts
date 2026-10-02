@@ -19,9 +19,24 @@ export async function POST(request:Request,{params}:{params:Promise<{stream:stri
     if(!hasScope(auth,"events:write")) return Response.json({error:"FORBIDDEN"},{status:403});
     const secret=process.env.ZEROAI_LEDGER_SECRET;
     if(!secret) return Response.json({error:"ZEROAI_LEDGER_SECRET_NOT_CONFIGURED"},{status:503});
-    const parsed=Body.safeParse(await request.json());
+
+    let body:unknown;
+    try {
+      body=await request.json();
+    } catch {
+      return Response.json({error:"INVALID_JSON"},{status:400});
+    }
+
+    const parsed=Body.safeParse(body);
     if(!parsed.success) return Response.json({error:"INVALID_REQUEST",issues:parsed.error.issues},{status:422});
-    const event=await appendWorkspaceEvent({store,workspaceId:auth.workspaceId,stream,secret,...parsed.data});
+    const event=await appendWorkspaceEvent({
+      store,
+      workspaceId:auth.workspaceId,
+      stream,
+      secret,
+      anchor:process.env.ZEROAI_LEDGER_ANCHOR ?? "GENESIS",
+      ...parsed.data
+    });
     return Response.json({event},{status:201});
   } catch(error) {
     const message=error instanceof Error ? error.message : "UNKNOWN_ERROR";
