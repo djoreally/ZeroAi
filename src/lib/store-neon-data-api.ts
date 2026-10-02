@@ -12,6 +12,7 @@ import type {
 import type { ZeroStore } from "./store";
 
 type Row=Record<string,any>;
+type TokenProvider=()=>Promise<string>;
 
 function fail(error:any):never {
   const message=error?.message ?? "NEON_DATA_API_ERROR";
@@ -46,11 +47,11 @@ function certification(row:Row):CertificationRecord {
 export class NeonDataApiZeroStore implements ZeroStore {
   private client:any;
 
-  constructor(dataApiUrl:string,token:string){
+  constructor(dataApiUrl:string,getToken:TokenProvider){
     this.client=createClient({
       dataApi:{
         url:dataApiUrl,
-        getToken:async()=>token
+        getToken
       }
     });
   }
