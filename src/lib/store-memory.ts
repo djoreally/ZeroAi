@@ -31,6 +31,9 @@ export class MemoryZeroStore implements ZeroStore {
   async getWorkspaceMembership(workspaceId:string,authUserId:string){
     return this.workspaceMemberships.get(`${workspaceId}:${authUserId}`) ?? null;
   }
+  async createWorkspaceMembership(membership:WorkspaceMembership){
+    this.workspaceMemberships.set(`${membership.workspaceId}:${membership.authUserId}`,membership);
+  }
 
   async createApiKey(record:ApiKeyRecord){this.apiKeys.set(record.id,record);}
   async findApiKeyByPrefix(prefix:string){return [...this.apiKeys.values()].find(k=>k.prefix===prefix && !k.revokedAt) ?? null;}
