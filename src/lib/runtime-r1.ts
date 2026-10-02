@@ -1,22 +1,5 @@
 import { z } from "zod";
-import { ProviderId } from "./provider-registry";
-
-export const ProviderIdSchema=ProviderId;
-export const CredentialRefSchema=z.object({
-  type:z.literal("env"),
-  name:z.string().regex(/^[A-Z][A-Z0-9_]*$/)
-});
-
-export const ProviderBindingSchema=z.object({
-  provider:ProviderIdSchema,
-  model:z.string().min(1),
-  credentialRef:CredentialRefSchema.optional(),
-  baseUrl:z.string().url().optional()
-}).superRefine((value,ctx)=>{
-  if(value.provider!=="ollama" && !value.credentialRef){
-    ctx.addIssue({code:"custom",message:"CREDENTIAL_REFERENCE_REQUIRED"});
-  }
-});
+import type { ProviderBindingRecord } from "./provider-binding";
 
 export const RepoContextSchema=z.object({
   root:z.string().min(1),
@@ -29,7 +12,6 @@ export const RepoContextSchema=z.object({
 export const InterceptRequestSchema=z.object({
   workspaceId:z.string().min(1),
   prompt:z.string().trim().min(1).max(20000),
-  provider:ProviderBindingSchema,
   repo:RepoContextSchema
 });
 
@@ -44,7 +26,7 @@ function classify(prompt:string):IntentMode {
   return "READ";
 }
 
-export function compileIntercept(input:InterceptRequest){
+export function compileIntercept(input:InterceptRequest,provider:ProviderBindingRecord){
   const mode=classify(input.prompt);
   const requestedCapabilities=
     mode==="READ" ? ["repo.read","repo.search"] :
@@ -74,10 +56,10 @@ export function compileIntercept(input:InterceptRequest){
       }
     },
     providerRequest:{
-      provider:input.provider.provider,
-      model:input.provider.model,
-      baseUrl:input.provider.baseUrl ?? null,
-      credentialRef:input.provider.credentialRef ?? null,
+      provider:provider.provider,
+      model:provider.model,
+      baseUrl:provider.baseUrl ?? null,
+      credentialRef:provider.credentialRef ?? null,
       prompt:input.prompt,
       context:{
         repository:{
