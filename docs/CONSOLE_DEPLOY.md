@@ -2,6 +2,12 @@
 
 ZeroAI ships as one Next.js application.
 
+## Production URL
+
+- Canonical production URL: `https://zeroaifrt.vercel.app`
+- Canonical Git repository: `djoreally/ZeroAi`
+- Production branch: `main`
+
 ## Surfaces
 
 - `/` — public product site
@@ -31,7 +37,7 @@ The frontend and ZeroAI API routes deploy together. A separate backend Vercel pr
 Required console/auth values:
 
 - `ZEROAI_APP_URL`
-- `ZEROAI_PLATFORM_ADMIN_EMAIL`
+- `ZEROAI_PLATFORM_ADMIN_EMAIL` or `ZEROAI_PLATFORM_ADMIN`
 - `NEXT_PUBLIC_NEON_AUTH_BASE_URL`
 - `NEON_AUTH_BASE_URL`
 
@@ -41,7 +47,7 @@ Required ZeroAI runtime values remain documented in `.env.example`.
 
 1. Pre-create the human admin in Neon Auth.
 2. Assign the Neon Auth role `platform_admin`.
-3. Configure the same email in `ZEROAI_PLATFORM_ADMIN_EMAIL`.
+3. Configure the same email in `ZEROAI_PLATFORM_ADMIN_EMAIL` or `ZEROAI_PLATFORM_ADMIN`.
 4. Open `/admin/setup`.
 5. Enter the configured admin email.
 6. Neon Auth sends a password-setup/reset token.
@@ -66,10 +72,10 @@ Human authentication and workspace authorization are separate.
 1. Merge console PR.
 2. Create/connect Vercel project to `djoreally/ZeroAi`.
 3. Add production environment variables.
-4. Set `ZEROAI_APP_URL` to the production deployment URL/domain.
+4. Set `ZEROAI_APP_URL=https://zeroaifrt.vercel.app`.
 5. Add that origin to Neon Auth trusted domains.
 6. Pre-create and role the platform admin.
-7. Deploy.
+7. Deploy from `main`.
 8. Run admin password setup.
 9. Verify login and role separation.
 10. Run persistence health and managed persistence E2E.
