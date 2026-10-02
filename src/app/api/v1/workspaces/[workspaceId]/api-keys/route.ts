@@ -7,8 +7,15 @@ const Body=z.object({
   scopes:z.array(z.string().min(1)).min(1)
 });
 
+function isAdmin(request:Request){
+  const expected=process.env.ZEROAI_ADMIN_TOKEN;
+  const header=request.headers.get("authorization");
+  return Boolean(expected && header===`Bearer ${expected}`);
+}
+
 export async function POST(request:Request,{params}:{params:Promise<{workspaceId:string}>}) {
   try {
+    if(!isAdmin(request)) return Response.json({error:"UNAUTHORIZED"},{status:401});
     const {workspaceId}=await params;
     const parsed=Body.safeParse(await request.json());
     if(!parsed.success) return Response.json({error:"INVALID_REQUEST",issues:parsed.error.issues},{status:422});
