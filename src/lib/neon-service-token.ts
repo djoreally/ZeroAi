@@ -8,15 +8,20 @@ function decodeBase64Url(input:string){
   return Buffer.from(input.replace(/-/g,"+").replace(/_/g,"/"),"base64").toString("utf8");
 }
 
-export function jwtExpiry(token:string):number {
+export function jwtPayload(token:string):Record<string,unknown>|null {
   const parts=token.split(".");
-  if(parts.length!==3) return 0;
+  if(parts.length!==3) return null;
   try {
-    const payload=JSON.parse(decodeBase64Url(parts[1])) as {exp?:number};
-    return typeof payload.exp==="number" ? payload.exp*1000 : 0;
+    return JSON.parse(decodeBase64Url(parts[1])) as Record<string,unknown>;
   } catch {
-    return 0;
+    return null;
   }
+}
+
+export function jwtExpiry(token:string):number {
+  const payload=jwtPayload(token);
+  const exp=payload?.exp;
+  return typeof exp==="number" ? exp*1000 : 0;
 }
 
 function cookieHeader(response:Response):string {
@@ -86,6 +91,11 @@ export async function getNeonDataApiToken():Promise<string> {
   } catch {
     sessionCache={cookie:await signInService(baseUrl,email,password)};
     token=await fetchJwt(baseUrl,sessionCache.cookie);
+  }
+
+  const payload=jwtPayload(token);
+  if(payload?.role!=="zeroai_service"){
+    throw new Error("NEON_SERVICE_ROLE_MISMATCH");
   }
 
   tokenCache={
