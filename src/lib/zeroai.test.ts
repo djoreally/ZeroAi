@@ -1,7 +1,7 @@
 import { describe,expect,it } from "vitest";
-import { createLedgerEvent,verifyLedgerChain } from "@/lib/ledger";
-import { evaluatePolicy } from "@/lib/policy";
-import { topologicalOrder } from "@/lib/task-graph";
+import { createLedgerEvent,verifyLedgerChain } from "./ledger";
+import { evaluatePolicy } from "./policy";
+import { topologicalOrder } from "./task-graph";
 
 describe("ZeroAI invariants",()=>{
   it("detects tampering in the ledger chain",()=>{
