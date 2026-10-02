@@ -52,11 +52,11 @@ NEXT STATE
 
 The model may propose actions. It never becomes canonical state, grants its own authority, or certifies its own work.
 
-## BaaS surface — initial slice
+## BaaS surface
 
-- `POST /api/v1/intent/validate` — validates a typed intent contract.
-- `POST /api/v1/ledger/verify` — verifies a signed hash-chain ledger.
-- Library primitives cover policy evaluation, deterministic gates, evidence certification, task-graph validation/order, and memory compaction.
+ZeroAI now includes workspace tenancy, API-key scopes, canonical state, policy evaluation, ZeroLedger streams, ZeroMemory facts, executions, evidence, and persisted certification.
+
+Production persistence is backed by Neon Data API through the provider-agnostic `ZeroStore` interface. See `docs/BAAS.md` and `docs/NEON_PRODUCTION.md`.
 
 ## Development
 

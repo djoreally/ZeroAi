@@ -60,6 +60,18 @@ The domain layer depends only on the `ZeroStore` interface.
 
 Development may use `MemoryZeroStore`. Production fails closed unless a durable adapter is configured.
 
-The initial production adapter is `NeonDataApiZeroStore`, powered by Neon Data API over HTTPS through `@neondatabase/neon-js`. It is activated with `NEON_DATA_API_URL` and `ZEROAI_NEON_DATA_API_TOKEN`.
+The initial production adapter is `NeonDataApiZeroStore`, powered by Neon Data API over HTTPS through `@neondatabase/neon-js`.
+
+### Current production Neon
+
+- Project: `fancy-tree-06659679`
+- Branch: `br-long-band-b4kl74qf` (`production`)
+- Database: `neondb`
+- Data API: `https://ep-broad-frog-b4hdhmen.apirest.c-6.us-east-2.aws.neon.tech/neondb/rest/v1`
+- Auth: Neon Auth / Better Auth
+- AI Gateway: enabled
+- Object storage: enabled
+
+The Data API is provisioned with Neon Auth and no anonymous table grants. Runtime must present a valid JWT; ZeroAI must not weaken the database to anonymous access merely to make persistence work.
 
 The canonical SQL model and atomic ZeroState write function live in `db/schema.sql`.
