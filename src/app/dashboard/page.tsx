@@ -13,7 +13,7 @@ type WorkspaceItem={
 type ProviderBinding={
   provider:"openai"|"anthropic"|"ollama"|"custom";
   model:string;
-  credentialRef?:{type:"env";name:string};
+  credentialRef?:{type:"env";name:string}|{type:"vault";id:"primary"};
   baseUrl?:string;
   version?:number;
   updatedAt?:string;
@@ -26,7 +26,9 @@ export default function DashboardPage(){
   const [binding,setBinding]=useState<ProviderBinding|null>(null);
   const [provider,setProvider]=useState<ProviderBinding["provider"]>("openai");
   const [model,setModel]=useState("");
+  const [credentialMode,setCredentialMode]=useState<"local"|"cloud">("local");
   const [credentialEnv,setCredentialEnv]=useState("OPENAI_API_KEY");
+  const [apiKey,setApiKey]=useState("");
   const [baseUrl,setBaseUrl]=useState("");
   const [busy,setBusy]=useState(false);
   const [message,setMessage]=useState("");
@@ -67,7 +69,13 @@ export default function DashboardPage(){
         if(value){
           setProvider(value.provider);
           setModel(value.model);
-          setCredentialEnv(value.credentialRef?.name ?? "");
+          if(value.credentialRef?.type==="env"){
+            setCredentialMode("local");
+            setCredentialEnv(value.credentialRef.name);
+          }else if(value.credentialRef?.type==="vault"){
+            setCredentialMode("cloud");
+            setCredentialEnv("");
+          }
           setBaseUrl(value.baseUrl ?? "");
         }
       })
@@ -85,10 +93,12 @@ export default function DashboardPage(){
     if(!workspaceId) return;
     setBusy(true); setMessage("");
 
-    const payload:ProviderBinding={
+    const payload={
       provider,
       model:model.trim(),
-      ...(provider!=="ollama" ? {credentialRef:{type:"env",name:credentialEnv.trim()}} : {}),
+      mode:provider==="ollama" ? "local" : credentialMode,
+      ...(provider!=="ollama" && credentialMode==="local" ? {credentialEnv:credentialEnv.trim()} : {}),
+      ...(provider!=="ollama" && credentialMode==="cloud" ? {apiKey:apiKey.trim()} : {}),
       ...((provider==="ollama" || provider==="custom") && baseUrl.trim() ? {baseUrl:baseUrl.trim()} : {})
     };
 
@@ -101,6 +111,7 @@ export default function DashboardPage(){
       const body=await response.json();
       if(!response.ok) throw new Error(body.error ?? "Unable to connect AI provider.");
       setBinding(body.binding);
+      setApiKey("");
       setMessage("AI connection saved. The ZeroAI CLI will use this workspace binding.");
     }catch(error){
       setMessage(error instanceof Error ? error.message : "Unable to connect AI provider.");
@@ -176,7 +187,7 @@ export default function DashboardPage(){
             </div>
             <span className={binding ? "status" : "status neutral"}>{binding ? "CONNECTED" : "NOT CONNECTED"}</span>
           </div>
-          <p className="muted">ZeroAI stores the provider, model, and credential reference. The actual API key stays outside the repository.</p>
+          <p className="muted">Choose local BYOK to keep the provider key on your machine, or cloud BYOK to store it encrypted in ZeroAI. Plaintext keys are never returned by this dashboard.</p>
 
           <form onSubmit={saveProvider} className="provider-form">
             <label className="field">
@@ -195,9 +206,23 @@ export default function DashboardPage(){
             </label>
 
             {provider!=="ollama" && <label className="field">
+              <span>Credential mode</span>
+              <select value={credentialMode} onChange={event=>setCredentialMode(event.target.value as "local"|"cloud")}>
+                <option value="local">Local key — stays on this machine</option>
+                <option value="cloud">Cloud key — encrypted by ZeroAI</option>
+              </select>
+            </label>}
+
+            {provider!=="ollama" && credentialMode==="local" && <label className="field">
               <span>Credential environment variable</span>
               <input value={credentialEnv} onChange={event=>setCredentialEnv(event.target.value.toUpperCase())} placeholder="OPENAI_API_KEY" pattern="[A-Z][A-Z0-9_]*" required />
-              <small>ZeroAI records only this variable name, never the secret value.</small>
+              <small>ZeroAI stores only the variable name. Set the actual key in your terminal environment.</small>
+            </label>}
+
+            {provider!=="ollama" && credentialMode==="cloud" && <label className="field">
+              <span>{binding?.credentialRef?.type==="vault" ? "Replace API key" : "API key"}</span>
+              <input type="password" value={apiKey} onChange={event=>setApiKey(event.target.value)} autoComplete="off" placeholder={binding?.credentialRef?.type==="vault" ? "Enter a new key to replace the stored key" : "Paste provider API key"} required />
+              <small>The key is encrypted before persistence and is never returned to the browser.</small>
             </label>}
 
             {(provider==="ollama" || provider==="custom") && <label className="field">
