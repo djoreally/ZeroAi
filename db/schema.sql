@@ -147,3 +147,41 @@ create table if not exists zero_certifications (
   evidence_ids jsonb not null,
   created_at timestamptz not null
 );
+
+do $$
+begin
+  if not exists (select 1 from pg_roles where rolname='zeroai_service') then
+    create role zeroai_service nologin;
+  end if;
+end
+$$;
+
+grant usage on schema public to zeroai_service;
+
+grant select, insert, update, delete on table
+  zero_workspaces,
+  zero_api_keys,
+  zero_state,
+  zero_events,
+  zero_memory_facts,
+  zero_executions,
+  zero_evidence,
+  zero_certifications
+to zeroai_service;
+
+grant execute on function zero_put_state(uuid,text,jsonb,text,bigint,timestamptz)
+to zeroai_service;
+
+revoke all on table
+  zero_workspaces,
+  zero_api_keys,
+  zero_state,
+  zero_events,
+  zero_memory_facts,
+  zero_executions,
+  zero_evidence,
+  zero_certifications
+from anonymous;
+
+revoke all on function zero_put_state(uuid,text,jsonb,text,bigint,timestamptz)
+from anonymous;
