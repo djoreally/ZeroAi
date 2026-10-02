@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const EvidenceState = z.enum(["VERIFIED","PARTIAL","UNKNOWN","FAILED"]);
+export const EvidenceState = z.enum(["VERIFIED","PARTIAL","UNKNOWN","FAILED","BLOCKED_INFRASTRUCTURE"]);
 export const RiskLevel = z.enum(["low","medium","high"]);
 
 export const PermissionSchema = z.object({
