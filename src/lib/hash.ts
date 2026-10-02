@@ -5,7 +5,7 @@ export function sha256(value:string):string {
 }
 
 export function stableJson(value:unknown):string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "null";
   if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
   return `{${Object.entries(value as Record<string,unknown>)
     .sort(([a],[b])=>a.localeCompare(b))
