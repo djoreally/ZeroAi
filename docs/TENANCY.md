@@ -16,6 +16,12 @@ The workspace ID is the primary tenancy boundary for:
 
 A client never supplies its authoritative workspace ID on authenticated BaaS calls. The runtime derives it from the API key.
 
+## Administrative bootstrap
+
+Workspace creation and initial API-key provisioning require the server-side `ZEROAI_ADMIN_TOKEN`.
+
+That token is separate from workspace API keys and must never be exposed to browser clients.
+
 ## API keys
 
 Keys are shown once.
@@ -26,11 +32,13 @@ Example scopes:
 
 - `state:read`
 - `state:write`
+- `events:read`
+- `events:write`
 - `memory:read`
 - `memory:write`
 - `execution:run`
 - `evidence:write`
-- `certification:read`
+- `certification:write`
 - `*`
 
 ## Canonical state
