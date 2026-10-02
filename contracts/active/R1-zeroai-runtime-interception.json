@@ -25,11 +25,15 @@
     "package-lock.json",
     ".github/workflows/**",
     "README.md",
-    "db/schema.sql"
+    "db/schema.sql",
+    ".env.example"
   ],
   "protectedPaths": [
-    ".env*",
-    "src/app/admin/**"
+    "src/app/admin/**",
+    ".env",
+    ".env.local",
+    ".env.production",
+    ".env.production.local"
   ],
   "invariants": [
     "Every prompt is intercepted before provider dispatch.",
@@ -37,7 +41,8 @@
     "Provider credentials are never committed to the repository.",
     "R1 does not grant models direct OS, Git, database, browser, network, deployment, or external-tool execution authority.",
     "R2 worktree mutation/execution behavior is not implemented by weakening R1 controls.",
-    "Certification-state schema changes are limited to BLOCKED_INFRASTRUCTURE support."
+    "Certification-state schema changes are limited to BLOCKED_INFRASTRUCTURE support.",
+    "Only .env.example may change for documented environment variable names; runtime secret values remain protected."
   ],
   "acceptanceCriteria": [
     {
