@@ -19,7 +19,10 @@ export function createLedgerEvent(input:LedgerEventInput,secret:string):LedgerEv
   return {...input,eventHash,signature:signHash(eventHash,secret)};
 }
 
-export function verifyLedgerChain(events:LedgerEvent[],secret:string):boolean {
+export function verifyLedgerChain(events:LedgerEvent[],secret:string,expectedAnchor="GENESIS"):boolean {
+  if(events.length===0) return false;
+  if(events[0].parentHash!==expectedAnchor) return false;
+
   for (let i=0;i<events.length;i+=1) {
     const {eventHash,signature,...unsigned}=events[i];
     if (hashObject(unsigned)!==eventHash) return false;

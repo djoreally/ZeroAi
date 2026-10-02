@@ -16,13 +16,21 @@ The runtime does not execute an unvalidated intent contract.
 
 Validates graph structure and returns deterministic topological execution order.
 
-Unknown dependencies and cycles are rejected.
+Unknown dependencies, duplicate IDs, self-dependencies, and cycles are rejected.
 
 ## Policy
 
+### PUT /api/v1/workspaces/:workspaceId/policy
+
+Admin-only provisioning for authoritative workspace policy.
+
+Policy is stored under the reserved canonical-state key `zero.policy.rules`. Normal workspace keys cannot overwrite reserved `zero.*` state.
+
 ### POST /api/v1/policy/evaluate
 
-Evaluates an agent action against deterministic policy rules.
+Authenticated authoritative evaluation.
+
+The caller submits only the requested action. ZeroAI loads the policy rules from trusted workspace state.
 
 Precedence is:
 
@@ -37,14 +45,16 @@ Models may request authority. They cannot grant it.
 
 ### POST /api/v1/ledger/verify
 
-Verifies content hashes, HMAC signatures, and parent linkage for the supplied ZeroLedger chain.
+Verifies a non-empty ledger chain against the server-configured trusted anchor, content hashes, HMAC signatures, and parent linkage.
 
-A modified historical event invalidates the chain.
+A modified, truncated-from-genesis, or incorrectly anchored chain is rejected.
 
 ## Certification
 
 ### POST /api/v1/certify
 
-Evaluates a requirement against supplied evidence.
+Stateless simulation only. The response explicitly reports `authoritative: false`.
 
-No matching evidence returns `UNKNOWN`, never an implicit success.
+Authoritative certification is performed by `POST /api/v1/executions/:executionId/certifications`, which reads persisted evidence for that execution instead of accepting caller-asserted evidence as truth.
+
+No evidence means `UNKNOWN`, never success.

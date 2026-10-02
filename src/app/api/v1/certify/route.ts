@@ -9,7 +9,7 @@ const Evidence=z.object({
 });
 const Requirement=z.object({
   id:z.string(),
-  requiredEvidenceTypes:z.array(z.string())
+  requiredEvidenceTypes:z.array(z.string()).min(1)
 });
 const Body=z.object({
   requirement:Requirement,
@@ -17,7 +17,18 @@ const Body=z.object({
 });
 
 export async function POST(request:Request) {
-  const parsed=Body.safeParse(await request.json());
+  let body:unknown;
+  try {
+    body=await request.json();
+  } catch {
+    return Response.json({error:"INVALID_JSON"},{status:400});
+  }
+
+  const parsed=Body.safeParse(body);
   if (!parsed.success) return Response.json({error:"INVALID_REQUEST",issues:parsed.error.issues},{status:422});
-  return Response.json(certify(parsed.data.requirement,parsed.data.evidence));
+
+  return Response.json({
+    authoritative:false,
+    result:certify(parsed.data.requirement,parsed.data.evidence)
+  });
 }
