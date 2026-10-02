@@ -20,6 +20,7 @@ export async function GET(request:Request,{params}:{params:Promise<{key:string}>
 export async function PUT(request:Request,{params}:{params:Promise<{key:string}>}) {
   try {
     const {key}=await params;
+    if(key.startsWith("zero.")) return Response.json({error:"RESERVED_STATE_KEY"},{status:403});
     const store=getStore();
     const auth=await authenticateRequest(request,store);
     if(!auth) return Response.json({error:"UNAUTHORIZED"},{status:401});
