@@ -1,0 +1,74 @@
+{
+  "id": "R1-zeroai-runtime-interception",
+  "goal": "Implement milestone R1 from contracts/runtime-plan.json: the ZeroAI CLI interception layer, workspace binding, provider/BYOK registry, ZeroIntercept, Intent Compiler, and authorized context envelope.",
+  "requirementIds": [
+    "ARCH-001",
+    "CLI-001",
+    "BYOK-001",
+    "INT-001",
+    "CTX-001",
+    "SCOPE-001",
+    "CERT-001"
+  ],
+  "allowedPaths": [
+    "packages/cli/**",
+    "src/runtime/**",
+    "src/lib/**",
+    "src/app/api/v1/**",
+    "requirements/**",
+    "decisions/**",
+    "contracts/**",
+    "certification/**",
+    "scripts/**",
+    "package.json",
+    "package-lock.json",
+    ".github/workflows/**",
+    "README.md"
+  ],
+  "protectedPaths": [
+    "db/**",
+    ".env*",
+    "src/app/admin/**"
+  ],
+  "invariants": [
+    "Every prompt is intercepted before provider dispatch.",
+    "ZeroAI determines which context is disclosed to a provider.",
+    "Provider credentials are never committed to the repository.",
+    "R1 does not grant models direct OS, Git, database, browser, network, deployment, or external-tool execution authority.",
+    "R2 worktree mutation/execution behavior is not implemented by weakening R1 controls."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "R1-AC-001",
+      "description": "Running zeroai inside a Git repository starts an interactive ZeroAI session bound to that repository and workspace.",
+      "evidence": ["CLI integration test", "process exit status", "captured terminal transcript"]
+    },
+    {
+      "id": "R1-AC-002",
+      "description": "A natural-language prompt is intercepted and compiled into a typed execution intent before any provider adapter is invoked.",
+      "evidence": ["unit test proving interceptor precedes provider invocation", "execution trace"]
+    },
+    {
+      "id": "R1-AC-003",
+      "description": "Provider/BYOK configuration resolves through secure credential references and does not persist plaintext provider secrets in the repository.",
+      "evidence": ["credential-storage test", "repository secret scan"]
+    },
+    {
+      "id": "R1-AC-004",
+      "description": "Only ZeroAI-authorized repo, memory, workspace, and policy context is present in the provider request envelope.",
+      "evidence": ["context-envelope contract test", "provider-adapter fixture"]
+    },
+    {
+      "id": "R1-AC-005",
+      "description": "Existing architecture certification, typecheck, tests, and production build remain green.",
+      "evidence": ["GitHub Actions zeroai-certification"]
+    }
+  ],
+  "prohibitedChanges": [
+    "No direct model tool execution.",
+    "No direct production deployment.",
+    "No plaintext provider API keys in repo files.",
+    "No destructive changes to a user's working tree.",
+    "No skipping ahead to R2/R3/R4 by bypassing R1 acceptance criteria."
+  ]
+}
