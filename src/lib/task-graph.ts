@@ -4,16 +4,32 @@ import { z } from "zod";
 export const TaskGraphSchema = z.object({
   nodes:z.array(TaskNodeSchema).min(1)
 }).superRefine(({nodes},ctx)=>{
+  const counts=new Map<string,number>();
+  for(const node of nodes) counts.set(node.id,(counts.get(node.id) ?? 0)+1);
+
+  for(const [id,count] of counts){
+    if(count>1) ctx.addIssue({code:"custom",message:`Duplicate task id ${id}`});
+  }
+
   const ids=new Set(nodes.map(n=>n.id));
   for (const node of nodes) {
     for (const dep of node.dependencies) {
       if (!ids.has(dep)) ctx.addIssue({code:"custom",message:`Unknown dependency ${dep} for ${node.id}`});
+      if (dep===node.id) ctx.addIssue({code:"custom",message:`Task ${node.id} cannot depend on itself`});
     }
+  }
+
+  try {
+    topologicalOrder(nodes);
+  } catch(error) {
+    ctx.addIssue({code:"custom",message:error instanceof Error ? error.message : "Invalid task graph"});
   }
 });
 
 export function topologicalOrder(nodes:z.infer<typeof TaskNodeSchema>[]) {
   const byId=new Map(nodes.map(node=>[node.id,node]));
+  if(byId.size!==nodes.length) throw new Error("Task graph contains duplicate ids");
+
   const visiting=new Set<string>();
   const visited=new Set<string>();
   const result:typeof nodes=[];
