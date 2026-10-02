@@ -1,6 +1,7 @@
 import type { ZeroStore } from "./store";
 import { MemoryZeroStore } from "./store-memory";
 import { NeonDataApiZeroStore } from "./store-neon-data-api";
+import { getNeonDataApiToken } from "./neon-service-token";
 
 declare global {
   var __zeroaiMemoryStore:MemoryZeroStore|undefined;
@@ -9,10 +10,9 @@ declare global {
 
 export function getStore():ZeroStore {
   const dataApiUrl=process.env.NEON_DATA_API_URL;
-  const token=process.env.ZEROAI_NEON_DATA_API_TOKEN;
 
-  if(dataApiUrl && token){
-    globalThis.__zeroaiNeonStore ??= new NeonDataApiZeroStore(dataApiUrl,token);
+  if(dataApiUrl){
+    globalThis.__zeroaiNeonStore ??= new NeonDataApiZeroStore(dataApiUrl,getNeonDataApiToken);
     return globalThis.__zeroaiNeonStore;
   }
 
