@@ -24,10 +24,10 @@
     "package.json",
     "package-lock.json",
     ".github/workflows/**",
-    "README.md"
+    "README.md",
+    "db/schema.sql"
   ],
   "protectedPaths": [
-    "db/**",
     ".env*",
     "src/app/admin/**"
   ],
@@ -36,7 +36,8 @@
     "ZeroAI determines which context is disclosed to a provider.",
     "Provider credentials are never committed to the repository.",
     "R1 does not grant models direct OS, Git, database, browser, network, deployment, or external-tool execution authority.",
-    "R2 worktree mutation/execution behavior is not implemented by weakening R1 controls."
+    "R2 worktree mutation/execution behavior is not implemented by weakening R1 controls.",
+    "Certification-state schema changes are limited to BLOCKED_INFRASTRUCTURE support."
   ],
   "acceptanceCriteria": [
     {
@@ -85,6 +86,7 @@
     "No direct production deployment.",
     "No plaintext provider API keys in repo files.",
     "No destructive changes to a user's working tree.",
-    "No skipping ahead to R2/R3/R4 by bypassing R1 acceptance criteria."
+    "No skipping ahead to R2/R3/R4 by bypassing R1 acceptance criteria.",
+    "No unrelated database schema changes."
   ]
 }
