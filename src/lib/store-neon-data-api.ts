@@ -91,6 +91,18 @@ export class NeonDataApiZeroStore implements ZeroStore {
     return data ? workspaceMembership(data) : null;
   }
 
+  async createWorkspaceMembership(value:WorkspaceMembership){
+    const {error}=await this.client.from("zero_workspace_memberships").insert({
+      workspace_id:value.workspaceId,
+      auth_user_id:value.authUserId,
+      role:value.role,
+      status:value.status,
+      created_at:value.createdAt,
+      updated_at:value.updatedAt
+    });
+    if(error) fail(error);
+  }
+
   async createApiKey(value:ApiKeyRecord){
     const {error}=await this.client.from("zero_api_keys").insert({
       id:value.id,workspace_id:value.workspaceId,name:value.name,prefix:value.prefix,secret_hash:value.secretHash,scopes:value.scopes,created_at:value.createdAt,last_used_at:value.lastUsedAt ?? null,revoked_at:value.revokedAt ?? null
