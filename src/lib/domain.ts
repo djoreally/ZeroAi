@@ -76,7 +76,7 @@ export type EvidenceRecord = {
   workspaceId:string;
   executionId:string;
   type:string;
-  state:"VERIFIED"|"PARTIAL"|"UNKNOWN"|"FAILED";
+  state:"VERIFIED"|"PARTIAL"|"UNKNOWN"|"FAILED"|"BLOCKED_INFRASTRUCTURE"|"BLOCKED_INFRASTRUCTURE";
   artifactHash?:string;
   payload:unknown;
   createdAt:string;
