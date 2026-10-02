@@ -13,6 +13,7 @@ export async function appendWorkspaceEvent(input:{
   payload:unknown;
   evidenceRefs?:string[];
   secret:string;
+  anchor?:string;
 }):Promise<EventRecord> {
   const latest=await input.store.getLatestEvent(input.workspaceId,input.stream);
   const id=randomUUID();
@@ -25,7 +26,7 @@ export async function appendWorkspaceEvent(input:{
     action:input.action,
     timestamp:createdAt,
     inputHash:payloadHash,
-    parentHash:latest?.eventHash ?? "GENESIS",
+    parentHash:latest?.eventHash ?? input.anchor ?? "GENESIS",
     evidenceRefs:input.evidenceRefs ?? []
   },input.secret);
 
