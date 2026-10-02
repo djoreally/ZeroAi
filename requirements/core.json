@@ -40,6 +40,56 @@
       "id": "REL-001",
       "statement": "Only a GitHub merge to main may initiate production deployment; agents do not directly deploy.",
       "criticality": "critical"
+    },
+    {
+      "id": "INT-001",
+      "statement": "Every user prompt enters ZeroAI through ZeroIntercept before any provider receives it.",
+      "criticality": "critical"
+    },
+    {
+      "id": "CTX-001",
+      "statement": "ZeroAI determines and authorizes the repository, memory, policy, and workspace context disclosed to a model.",
+      "criticality": "critical"
+    },
+    {
+      "id": "ACT-001",
+      "statement": "Models may propose structured actions but cannot execute operating-system, Git, database, network, browser, deployment, or external-tool actions directly.",
+      "criticality": "critical"
+    },
+    {
+      "id": "ISO-001",
+      "statement": "All mutating coding work executes in an isolated Git worktree or equivalent shadow state; the user's active checkout remains untouched until certification succeeds.",
+      "criticality": "critical"
+    },
+    {
+      "id": "AUTH-001",
+      "statement": "Every proposed action is evaluated by deterministic execution authority against explicit capabilities and active policy before execution.",
+      "criticality": "critical"
+    },
+    {
+      "id": "EVID-001",
+      "statement": "Execution evidence is derived from deterministic tool outputs, hashes, exit codes, and system assertions; sensitive traces follow retention policy.",
+      "criticality": "critical"
+    },
+    {
+      "id": "COMMIT-001",
+      "statement": "Only certified results may become trusted repository state or update ZeroMemory; state commit detects base-SHA conflicts before applying.",
+      "criticality": "critical"
+    },
+    {
+      "id": "CLI-001",
+      "statement": "The primary developer entrypoint is an interactive ZeroAI CLI session launched from a repository with the zeroai command.",
+      "criticality": "critical"
+    },
+    {
+      "id": "BYOK-001",
+      "statement": "ZeroAI supports user-selected AI providers through BYOK/provider adapters while ZeroAI retains control-plane authority.",
+      "criticality": "critical"
+    },
+    {
+      "id": "RUNTIME-001",
+      "statement": "The first runtime acceptance path is zeroai -> natural-language bug request -> intercept -> context -> provider -> authorized isolated execution -> deterministic certification -> atomic state commit -> memory update -> evidenced result.",
+      "criticality": "critical"
     }
   ]
 }
