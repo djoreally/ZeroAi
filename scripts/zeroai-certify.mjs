@@ -9,6 +9,8 @@ const required=[
   "requirements/core.json",
   "decisions/ledger.json",
   "contracts/change-contract.schema.json",
+  "contracts/runtime-plan.json",
+  "contracts/active/R1-zeroai-runtime-interception.json",
   "policies/prohibited-runtime.json",
   "agent-registry/agents.json",
   "certification/manifest.json"
@@ -26,6 +28,8 @@ function readJson(file){
 const architecture=readJson("architecture.registry.json");
 const requirements=readJson("requirements/core.json");
 const decisions=readJson("decisions/ledger.json");
+const runtimePlan=readJson("contracts/runtime-plan.json");
+const r1Contract=readJson("contracts/active/R1-zeroai-runtime-interception.json");
 const policy=readJson("policies/prohibited-runtime.json");
 readJson("contracts/change-contract.schema.json");
 readJson("agent-registry/agents.json");
@@ -35,6 +39,22 @@ const requirementIds=new Set(requirements?.requirements?.map(r=>r.id) ?? []);
 for(const decision of decisions?.decisions ?? []){
   for(const id of decision.requirements ?? []) if(!requirementIds.has(id)) failures.push(`UNKNOWN REQUIREMENT: ${decision.id} -> ${id}`);
 }
+
+const expectedMilestones=["R1","R2","R3","R4"];
+const actualMilestones=(runtimePlan?.milestones ?? []).map(m=>m.id);
+if(JSON.stringify(actualMilestones)!==JSON.stringify(expectedMilestones)){
+  failures.push(`RUNTIME PLAN ORDER DRIFT: expected ${expectedMilestones.join(" -> ")} got ${actualMilestones.join(" -> ")}`);
+}
+for(const milestone of runtimePlan?.milestones ?? []){
+  for(const id of milestone.requirements ?? []){
+    if(!requirementIds.has(id)) failures.push(`UNKNOWN RUNTIME REQUIREMENT: ${milestone.id} -> ${id}`);
+  }
+}
+for(const id of r1Contract?.requirementIds ?? []){
+  if(!requirementIds.has(id)) failures.push(`UNKNOWN R1 REQUIREMENT: ${id}`);
+}
+if(runtimePlan?.entrypoint!=="zeroai") failures.push("CLI-001: runtime entrypoint must remain zeroai");
+if(runtimePlan?.acceptanceCommand!=="zeroai > fix this bug") failures.push("RUNTIME-001: canonical acceptance command drifted");
 
 if(architecture?.providers?.database?.access!=="Data API only") failures.push("DB-001: architecture registry must require Data API only");
 if(architecture?.providers?.telephony?.provider!=="AgentPhone" || architecture?.providers?.telephony?.exclusive!==true) failures.push("TEL-001: AgentPhone must be exclusive");
@@ -70,4 +90,4 @@ if(failures.length){
   process.exit(1);
 }
 console.log("ZEROAI ARCHITECTURE CERTIFICATION: VERIFIED");
-console.log(`requirements=${requirementIds.size} decisions=${decisions?.decisions?.length ?? 0}`);
+console.log(`requirements=${requirementIds.size} decisions=${decisions?.decisions?.length ?? 0} runtime=${actualMilestones.join("->")}`);
