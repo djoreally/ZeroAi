@@ -26,7 +26,8 @@
     ".github/workflows/**",
     "README.md",
     "db/schema.sql",
-    ".env.example"
+    ".env.example",
+    ".gitignore"
   ],
   "protectedPaths": [
     "src/app/admin/**",
