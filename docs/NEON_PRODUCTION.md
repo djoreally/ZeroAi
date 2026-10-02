@@ -16,16 +16,42 @@
 - Auth provider: Neon Auth
 - Exposed schema: `public`
 - Anonymous role: `anonymous`
-- Anonymous grants: intentionally not provisioned
+- Anonymous CRUD grants: revoked
 
-ZeroAI runtime access must use a valid JWT accepted by the Data API. Do not grant anonymous CRUD access to the `zero_*` tables.
+ZeroAI runtime access uses a dedicated Neon Auth service account whose JWT role is `zeroai_service`.
+
+The production database grants `zeroai_service` CRUD access to the ZeroAI canonical tables and execute access to `zero_put_state`. Human Neon Auth users do not receive those database privileges by default.
 
 ## Neon Auth
 
 - Base URL: `https://ep-broad-frog-b4hdhmen.neonauth.c-6.us-east-2.aws.neon.tech/neondb/auth`
 - JWKS: `https://ep-broad-frog-b4hdhmen.neonauth.c-6.us-east-2.aws.neon.tech/neondb/auth/.well-known/jwks.json`
 
-Neon Auth is the human sign-in system. Workspace/API-key authorization remains a ZeroAI concern.
+Neon Auth is the human sign-in system and the issuer for the internal Data API service JWT.
+
+ZeroAI customer API keys remain a separate application-level authorization system.
+
+## Machine authorization chain
+
+```text
+Customer ZeroAI API key
+        ↓
+ZeroAI scope check
+        ↓
+ZeroAI server
+        ↓
+Neon Auth service session
+        ↓
+short-lived JWT (role=zeroai_service)
+        ↓
+Neon Data API
+        ↓
+Postgres
+```
+
+Customers never receive the Neon session or JWT.
+
+See `docs/SERVICE_AUTH.md`.
 
 ## AI Gateway
 
@@ -55,5 +81,6 @@ The production database contains:
 - `zero_evidence`
 - `zero_certifications`
 - `zero_put_state(...)`
+- PostgreSQL role `zeroai_service`
 
-The schema was applied transactionally from `db/schema.sql`.
+The schema and service-role grants are reproducible from `db/schema.sql`.
