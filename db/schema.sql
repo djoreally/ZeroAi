@@ -7,6 +7,26 @@ create table if not exists zero_workspaces (
   updated_at timestamptz not null
 );
 
+create table if not exists zero_user_profiles (
+  auth_user_id uuid primary key,
+  onboarding_state text not null check (onboarding_state in ('PASSWORD_SETUP_REQUIRED','ACTIVE','SUSPENDED')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists zero_workspace_memberships (
+  workspace_id uuid not null references zero_workspaces(id) on delete cascade,
+  auth_user_id uuid not null,
+  role text not null check (role in ('owner','admin','member','viewer')),
+  status text not null check (status in ('active','invited','suspended')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (workspace_id,auth_user_id)
+);
+
+create index if not exists zero_workspace_memberships_user_idx
+  on zero_workspace_memberships(auth_user_id,status);
+
 create table if not exists zero_api_keys (
   id uuid primary key,
   workspace_id uuid not null references zero_workspaces(id) on delete cascade,
@@ -160,6 +180,8 @@ grant usage on schema public to zeroai_service;
 
 grant select, insert, update, delete on table
   zero_workspaces,
+  zero_user_profiles,
+  zero_workspace_memberships,
   zero_api_keys,
   zero_state,
   zero_events,
@@ -174,6 +196,8 @@ to zeroai_service;
 
 revoke all on table
   zero_workspaces,
+  zero_user_profiles,
+  zero_workspace_memberships,
   zero_api_keys,
   zero_state,
   zero_events,
