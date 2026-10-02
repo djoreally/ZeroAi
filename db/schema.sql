@@ -29,6 +29,55 @@ create table if not exists zero_state (
   primary key (workspace_id,key)
 );
 
+create or replace function zero_put_state(
+  p_workspace_id uuid,
+  p_key text,
+  p_value jsonb,
+  p_value_hash text,
+  p_expected_version bigint,
+  p_updated_at timestamptz
+) returns setof zero_state
+language plpgsql
+as $$
+declare
+  v_current bigint;
+begin
+  select version into v_current
+  from zero_state
+  where workspace_id=p_workspace_id and key=p_key
+  for update;
+
+  if found then
+    if p_expected_version is not null and v_current<>p_expected_version then
+      raise exception 'STATE_VERSION_CONFLICT';
+    end if;
+
+    update zero_state
+    set version=v_current+1,
+        value=p_value,
+        value_hash=p_value_hash,
+        updated_at=p_updated_at
+    where workspace_id=p_workspace_id and key=p_key;
+  else
+    if p_expected_version is not null and p_expected_version<>0 then
+      raise exception 'STATE_VERSION_CONFLICT';
+    end if;
+
+    begin
+      insert into zero_state(workspace_id,key,version,value,value_hash,updated_at)
+      values(p_workspace_id,p_key,1,p_value,p_value_hash,p_updated_at);
+    exception when unique_violation then
+      raise exception 'STATE_VERSION_CONFLICT';
+    end;
+  end if;
+
+  return query
+  select *
+  from zero_state
+  where workspace_id=p_workspace_id and key=p_key;
+end;
+$$;
+
 create table if not exists zero_events (
   id uuid primary key,
   workspace_id uuid not null references zero_workspaces(id) on delete cascade,
@@ -71,7 +120,7 @@ create table if not exists zero_executions (
   workspace_id uuid not null references zero_workspaces(id) on delete cascade,
   intent_hash text not null,
   graph_hash text not null,
-  status text not null,
+  status text not null check (status in ('queued','running','blocked','succeeded','failed','rejected')),
   current_task_id text,
   started_at timestamptz,
   completed_at timestamptz,
