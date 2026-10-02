@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "certify:architecture": "node scripts/zeroai-certify.mjs",
-    "certify": "npm run certify:architecture && npm run typecheck && npm test && npm run build"
+    "certify": "npm run certify:architecture && npm run typecheck && npm test && npm run build",
+    "zeroai": "node bin/zeroai.mjs"
   },
   "dependencies": {
     "@neondatabase/neon-js": "0.7.0-beta",
@@ -29,5 +30,8 @@
   },
   "engines": {
     "node": ">=24"
+  },
+  "bin": {
+    "zeroai": "bin/zeroai.mjs"
   }
 }
