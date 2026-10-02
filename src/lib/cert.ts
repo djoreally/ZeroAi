@@ -1,7 +1,7 @@
 export type Evidence = {
   id:string;
   type:string;
-  state:"VERIFIED"|"PARTIAL"|"UNKNOWN"|"FAILED";
+  state:"VERIFIED"|"PARTIAL"|"UNKNOWN"|"FAILED"|"BLOCKED_INFRASTRUCTURE";
   artifactHash?:string;
 };
 
@@ -18,6 +18,10 @@ export function certify(requirement:CertificationRequirement,evidence:Evidence[]
   const relevant=evidence.filter(item=>requirement.requiredEvidenceTypes.includes(item.type));
   if (relevant.some(item=>item.state==="FAILED")) {
     return {requirementId:requirement.id,state:"FAILED" as const,evidence:relevant};
+  }
+
+  if (relevant.some(item=>item.state==="BLOCKED_INFRASTRUCTURE")) {
+    return {requirementId:requirement.id,state:"BLOCKED_INFRASTRUCTURE" as const,evidence:relevant};
   }
 
   const satisfied=requirement.requiredEvidenceTypes.every(type=>
