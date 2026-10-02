@@ -213,7 +213,7 @@ export default function DashboardPage(){
           <div className="eyebrow">CLI setup</div>
           <h3>Start ZeroAI inside your repository</h3>
           <div className="terminal">
-            <code>npm install -g zeroai</code>
+            <code>npm install -g @zeroai/cli</code>
             <code>export ZEROAI_API_KEY=&quot;your-workspace-key&quot;</code>
             <code>{`zeroai bind ${workspaceId || "<workspace-id>"} --api-url ${typeof window!=="undefined" ? window.location.origin : "<zeroai-url>"}`}</code>
             <code>zeroai login</code>
