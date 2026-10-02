@@ -21,7 +21,6 @@ function writeConfig(value){
 function requiredConfig(config){
   if(!config.workspaceId) throw new Error("ZEROAI_WORKSPACE_NOT_BOUND: run zeroai bind <workspace-id>");
   if(!config.apiUrl) throw new Error("ZEROAI_API_URL_NOT_CONFIGURED: run zeroai bind <workspace-id> --api-url <url>");
-  if(!config.provider?.provider || !config.provider?.model) throw new Error("ZEROAI_PROVIDER_NOT_CONFIGURED: run zeroai provider <provider> <model> [credential-env]");
   return config;
 }
 
@@ -84,21 +83,33 @@ function bind(args){
   console.log(`ZeroAI workspace bound: ${workspaceId}`);
 }
 
-function provider(args){
+async function provider(args){
   const [providerId,model,credentialEnv]=args;
   if(!providerId || !model) throw new Error("Usage: zeroai provider <openai|anthropic|ollama|custom> <model> [credential-env]");
   if(!["openai","anthropic","ollama","custom"].includes(providerId)) throw new Error("ZEROAI_PROVIDER_UNSUPPORTED");
   if(providerId!=="ollama" && !credentialEnv) throw new Error("ZEROAI_CREDENTIAL_ENV_REQUIRED");
-  const current=readConfig();
-  writeConfig({
-    ...current,
-    provider:{
-      provider:providerId,
-      model,
-      ...(credentialEnv ? {credentialRef:{type:"env",name:credentialEnv}} : {})
-    }
+
+  const config=requiredConfig(readConfig());
+  const binding={
+    provider:providerId,
+    model,
+    ...(credentialEnv ? {credentialRef:{type:"env",name:credentialEnv}} : {})
+  };
+
+  const body=await request(config,"/api/v1/runtime/provider-binding",{
+    method:"PUT",
+    headers:{"x-zeroai-workspace":config.workspaceId},
+    body:JSON.stringify(binding)
   });
-  console.log(`ZeroAI provider configured: ${providerId}/${model}`);
+  console.log(`ZeroAI provider connected: ${body.binding.provider}/${body.binding.model}`);
+}
+
+async function providerStatus(config){
+  const body=await request(config,"/api/v1/runtime/provider-binding",{
+    method:"GET",
+    headers:{"x-zeroai-workspace":config.workspaceId}
+  });
+  return body.binding;
 }
 
 async function intercept(prompt){
@@ -109,7 +120,6 @@ async function intercept(prompt){
     body:JSON.stringify({
       workspaceId:config.workspaceId,
       prompt,
-      provider:config.provider,
       repo
     })
   });
@@ -118,7 +128,10 @@ async function intercept(prompt){
 async function shell(){
   const config=requiredConfig(readConfig());
   repoContext();
-  console.log(`ZeroAI R1 Control Plane | workspace=${config.workspaceId} | provider=${config.provider.provider}/${config.provider.model}`);
+  const binding=await providerStatus(config);
+  if(!binding) throw new Error("ZEROAI_PROVIDER_NOT_CONNECTED: run zeroai provider <provider> <model> [credential-env]");
+
+  console.log(`ZeroAI R1 Control Plane | workspace=${config.workspaceId} | provider=${binding.provider}/${binding.model}`);
   console.log("Execution authority: disabled (R1 interception only)");
   const rl=readline.createInterface({input:process.stdin,output:process.stdout,prompt:"zeroai> "});
   rl.prompt();
