@@ -26,6 +26,21 @@
 - **Task Graph** — resumable deterministic workflows
 - **Intent Contract** — typed boundary between intent and execution
 
+## Engineering authority
+
+ZeroAI now carries its own machine-readable engineering constitution. The canonical control artifacts are:
+
+- `zeroai.constitution.yaml` — non-negotiable engineering invariants
+- `architecture.registry.json` — authoritative subsystem/provider boundaries
+- `requirements/core.json` — durable requirement IDs
+- `decisions/ledger.json` — active/superseded engineering decisions
+- `contracts/` — bounded change contracts
+- `policies/` — negative/prohibited architecture rules
+- `agent-registry/` — agent responsibilities and authority limits
+- `certification/` — deterministic release gates
+
+Run `npm run certify:architecture` before ordinary verification. It fails closed on missing governance artifacts, provider drift, forbidden runtime tokens, forbidden database drivers, or broken requirement references.
+
 ## Execution loop
 
 ```text
@@ -54,7 +69,7 @@ The model may propose actions. It never becomes canonical state, grants its own 
 
 ## BaaS surface
 
-ZeroAI now includes workspace tenancy, API-key scopes, canonical state, policy evaluation, ZeroLedger streams, ZeroMemory facts, executions, evidence, and persisted certification.
+ZeroAI includes workspace tenancy, API-key scopes, canonical state, policy evaluation, ZeroLedger streams, ZeroMemory facts, executions, evidence, and persisted certification.
 
 Production persistence is backed by Neon Data API through the provider-agnostic `ZeroStore` interface. See `docs/BAAS.md` and `docs/NEON_PRODUCTION.md`.
 
@@ -62,9 +77,7 @@ Production persistence is backed by Neon Data API through the provider-agnostic 
 
 ```bash
 npm install
-npm run typecheck
-npm test
-npm run build
+npm run certify
 ```
 
 Node 24+ is the baseline.

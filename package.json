@@ -1,29 +1,33 @@
 {
-  "name":"zeroai",
-  "version":"0.1.0",
-  "private":true,
-  "description":"Deterministic AI runtime and BaaS control plane",
-  "scripts":{
-    "dev":"next dev",
-    "build":"next build",
-    "start":"next start",
-    "typecheck":"tsc --noEmit",
-    "test":"vitest run"
+  "name": "zeroai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deterministic AI runtime and BaaS control plane",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "certify:architecture": "node scripts/zeroai-certify.mjs",
+    "certify": "npm run certify:architecture && npm run typecheck && npm test && npm run build"
   },
-  "dependencies":{
-    "@neondatabase/neon-js":"0.7.0-beta",
-    "canonicalize":"5.1.0",
-    "next":"^16.0.0",
-    "react":"^19.2.0",
-    "react-dom":"^19.2.0",
-    "zod":"^4.1.11"
+  "dependencies": {
+    "@neondatabase/neon-js": "0.7.0-beta",
+    "canonicalize": "5.1.0",
+    "next": "^16.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.1.11"
   },
-  "devDependencies":{
-    "@types/node":"^24.7.0",
-    "@types/react":"^19.2.0",
-    "@types/react-dom":"^19.2.0",
-    "typescript":"^5.9.3",
-    "vitest":"^3.2.4"
+  "devDependencies": {
+    "@types/node": "^24.7.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   },
-  "engines":{"node":">=24"}
+  "engines": {
+    "node": ">=24"
+  }
 }

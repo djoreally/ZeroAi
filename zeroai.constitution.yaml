@@ -1,0 +1,38 @@
+version: 1
+name: ZeroAI Engineering Constitution
+authority: deterministic
+principles:
+  - inference proposes; deterministic systems decide
+  - canonical state lives outside inference
+  - no evidence means UNKNOWN
+  - agents cannot grant their own authority
+  - every change must be bounded by a change contract
+  - unrelated blast radius is a certification failure
+architecture:
+  database_access: neon_data_api_only
+  deployment_trigger: github_merge_to_main
+  preview_deployments: prohibited
+  memory: zero_memory
+  policy: zero_policy
+  ledger: zero_ledger
+  certification: zero_cert
+provider_constraints:
+  telephony:
+    required: agentphone
+    forbidden:
+      - twilio
+  email:
+    required: agentmail
+  database:
+    required: neon_data_api
+    forbidden:
+      - pg
+      - postgres
+      - prisma
+      - "@neondatabase/serverless"
+release:
+  require_architecture_certification: true
+  require_typecheck: true
+  require_tests: true
+  require_production_build: true
+  direct_agent_release: prohibited

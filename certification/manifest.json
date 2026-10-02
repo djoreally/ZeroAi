@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "gates": [
+    {
+      "id": "ARCH-CONTRACT",
+      "command": "node scripts/zeroai-certify.mjs",
+      "required": true
+    },
+    {
+      "id": "TYPECHECK",
+      "command": "npm run typecheck",
+      "required": true
+    },
+    {
+      "id": "TESTS",
+      "command": "npm test",
+      "required": true
+    },
+    {
+      "id": "BUILD",
+      "command": "npm run build",
+      "required": true
+    }
+  ],
+  "evidenceStates": [
+    "VERIFIED",
+    "PARTIAL",
+    "UNKNOWN",
+    "FAILED"
+  ],
+  "rule": "A required gate that does not produce passing evidence prevents certification."
+}

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "requirements": [
+    {
+      "id": "ARCH-001",
+      "statement": "ZeroAI is the deterministic authority around models; model output is advisory until accepted by deterministic controls.",
+      "criticality": "critical"
+    },
+    {
+      "id": "TEL-001",
+      "statement": "AgentPhone is the exclusive telephony provider. Twilio is prohibited in runtime code and dependencies.",
+      "criticality": "critical"
+    },
+    {
+      "id": "MAIL-001",
+      "statement": "AgentMail is the exclusive application email provider unless this requirement is explicitly superseded.",
+      "criticality": "critical"
+    },
+    {
+      "id": "DB-001",
+      "statement": "Application database access uses Neon Data API only; direct Postgres drivers and ORM database connections are prohibited.",
+      "criticality": "critical"
+    },
+    {
+      "id": "MEM-001",
+      "statement": "ZeroMemory stores compact durable state outside model context and preserves provenance/conflict state.",
+      "criticality": "critical"
+    },
+    {
+      "id": "SCOPE-001",
+      "statement": "Every engineering change declares expected paths, protected paths, invariants and acceptance criteria before implementation.",
+      "criticality": "critical"
+    },
+    {
+      "id": "CERT-001",
+      "statement": "No evidence means UNKNOWN. A model or executor cannot certify its own success.",
+      "criticality": "critical"
+    },
+    {
+      "id": "REL-001",
+      "statement": "Only a GitHub merge to main may initiate production deployment; agents do not directly deploy.",
+      "criticality": "critical"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "sourceRoots": [
+    "src"
+  ],
+  "forbiddenSourceTokens": [
+    {
+      "token": "twilio",
+      "requirementId": "TEL-001",
+      "reason": "AgentPhone is exclusive."
+    }
+  ],
+  "forbiddenDependencies": [
+    {
+      "name": "twilio",
+      "requirementId": "TEL-001"
+    },
+    {
+      "name": "pg",
+      "requirementId": "DB-001"
+    },
+    {
+      "name": "postgres",
+      "requirementId": "DB-001"
+    },
+    {
+      "name": "prisma",
+      "requirementId": "DB-001"
+    },
+    {
+      "name": "@prisma/client",
+      "requirementId": "DB-001"
+    },
+    {
+      "name": "@neondatabase/serverless",
+      "requirementId": "DB-001"
+    }
+  ]
+}

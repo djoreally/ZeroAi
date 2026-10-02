@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "systems": {
+    "controlPlane": {
+      "authority": "ZeroAI",
+      "components": [
+        "Intent Contract",
+        "Task Graph",
+        "ZeroPolicy",
+        "ZeroGate"
+      ]
+    },
+    "instructionPlane": {
+      "authority": "versioned contracts",
+      "components": [
+        "requirements",
+        "decisions",
+        "agent registry",
+        "change contracts"
+      ]
+    },
+    "executionPlane": {
+      "authority": "bounded executors",
+      "components": [
+        "models",
+        "tools",
+        "APIs",
+        "workers"
+      ]
+    },
+    "memoryPlane": {
+      "authority": "ZeroMemory",
+      "components": [
+        "canonical facts",
+        "conflict resolution",
+        "compaction",
+        "active capsules"
+      ]
+    },
+    "observationPlane": {
+      "authority": "ZeroCert",
+      "components": [
+        "ZeroLedger",
+        "evidence",
+        "tests",
+        "artifacts",
+        "hashes"
+      ]
+    }
+  },
+  "providers": {
+    "database": {
+      "provider": "Neon",
+      "access": "Data API only"
+    },
+    "telephony": {
+      "provider": "AgentPhone",
+      "exclusive": true
+    },
+    "email": {
+      "provider": "AgentMail",
+      "exclusive": true
+    },
+    "deployment": {
+      "provider": "Vercel",
+      "trigger": "GitHub merge to main only",
+      "previewDeployments": false
+    }
+  },
+  "invariants": [
+    "Models may propose actions but never become canonical authority.",
+    "Production persistence must never silently fall back to memory.",
+    "Normal clients cannot write reserved control state.",
+    "Certification reads persisted evidence instead of self-asserted success.",
+    "Changes outside the declared change contract are rejected."
+  ]
+}
