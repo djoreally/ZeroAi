@@ -1,0 +1,487 @@
+Here’s the **ZeroAI framework** I’d lock in as the canonical architecture.
+
+## ZeroAI
+
+**ZeroAI is not an AI model.**  
+It is the deterministic operating system around AI models.
+
+The model reasons.  
+ZeroAI controls **state, execution, permissions, memory, evidence, and certification**.
+
+### Core architecture
+
+| Plane | Responsibility | Typical implementation |
+|---|---|---|
+| **1. Control Plane** | Decides what runs, in what order, retries, dependencies, permissions, blocking gates | TypeScript, JSON schemas, workflow engine |
+| **2. Instruction Plane** | Defines how specialized agents reason and what standards they follow | Markdown + typed schemas |
+| **3. Execution Plane** | Executes tools, APIs, code, browser actions, database operations and agent jobs | Next.js/Node, workers, MCP/tools |
+| **4. Memory Plane** | Maintains compact durable state instead of replaying entire chat/history | Postgres/Neon, event log, fact graph, ZeroMemory |
+| **5. Observation Plane** | Records evidence of what actually happened | telemetry, logs, traces, screenshots, test results, hashes |
+
+The key rule is:
+
+> **Prompting is instruction. Orchestration is architecture.**
+
+A folder full of `architect.md`, `qa.md`, `security.md`, etc. is not a multi-agent system until something deterministic controls when those agents execute, what they are allowed to do, and whether their output is accepted.
+
+---
+
+## The ZeroAI execution loop
+
+```text
+USER / EVENT
+      ↓
+INTENT CONTRACT
+      ↓
+CONTROL PLANE
+      ↓
+TASK GRAPH
+      ↓
+AGENT / TOOL EXECUTION
+      ↓
+OBSERVATION + EVIDENCE
+      ↓
+VERIFICATION
+      ↓
+MEMORY REDUCTION
+      ↓
+CERTIFICATION / REJECTION
+      ↓
+NEXT STATE
+```
+
+Every run should produce a **state transition**, not merely another conversation message.
+
+---
+
+## ZeroAI's six core primitives
+
+### 1. Intent Contract
+
+Turn natural language into a typed contract before execution.
+
+```ts
+type IntentContract = {
+  goal: string
+  constraints: string[]
+  acceptanceCriteria: AcceptanceCriterion[]
+  permissions: Permission[]
+  resources: ResourceRef[]
+  riskLevel: "low" | "medium" | "high"
+}
+```
+
+The model can interpret the request.
+
+The runtime owns the contract.
+
+---
+
+### 2. Task Graph
+
+Never rely on the AI to remember the workflow.
+
+```text
+Understand request
+     ↓
+Inspect current state
+     ↓
+Plan changes
+     ↓
+Execute
+     ↓
+Test
+     ↓
+Verify evidence
+     ↓
+Certify
+```
+
+Each node has:
+
+```ts
+{
+  id,
+  dependencies,
+  owner,
+  inputs,
+  expectedOutputs,
+  timeout,
+  retryPolicy,
+  permissions,
+  acceptanceGate
+}
+```
+
+That makes execution resumable and deterministic.
+
+---
+
+### 3. Agent Registry
+
+Agents are capabilities, not personalities.
+
+```ts
+type AgentDefinition = {
+  id: string
+  version: string
+  responsibilities: string[]
+  allowedTools: string[]
+  forbiddenActions: string[]
+  inputSchema: ZodSchema
+  outputSchema: ZodSchema
+  instructionSet: string
+}
+```
+
+Example agents:
+
+```text
+architect
+frontend
+backend
+database
+security
+qa
+release
+research
+seo
+operations
+```
+
+The model behind any agent can change without changing the architecture.
+
+---
+
+## ZeroMemory
+
+This is the part that makes ZeroAI materially different.
+
+Do **not** keep shoving entire chat histories back into the model.
+
+Use:
+
+```text
+Raw Events
+   ↓
+Memory Extractor
+   ↓
+Fact Graph
+   ↓
+Dedupe
+   ↓
+Conflict Resolution
+   ↓
+Salience Scoring
+   ↓
+Compaction
+   ↓
+Active Memory
+```
+
+### Active-memory target
+
+I would still use roughly:
+
+```text
+Identity / standing rules       64 KB
+Projects / goals               128 KB
+Durable facts                  256 KB
+Recent compressed context      192 KB
+Learned patterns               128 KB
+Open issues / contradictions   128 KB
+Versioning / reserve           ~100 KB
+```
+
+**Typical operating target: 128–256 KB.**
+
+**Hard ceiling: ~1 MB.**
+
+Cold history can be effectively unlimited.
+
+The AI sees the **smallest sufficient state**.
+
+---
+
+## Event sourcing
+
+Everything important becomes an immutable event.
+
+```ts
+type ZeroEvent = {
+  eventId: string
+  workspaceId: string
+  actor: string
+  action: string
+  timestamp: string
+  inputHash: string
+  outputHash?: string
+  parentHash: string
+  evidenceRefs: string[]
+}
+```
+
+That gives you:
+
+```text
+event 001
+   ↓ hash
+event 002
+   ↓ hash
+event 003
+```
+
+If old history changes, the chain breaks.
+
+That's the foundation of the **tamper-evident ZeroLedger**.
+
+---
+
+# ZeroLedger
+
+Every meaningful execution should leave an immutable audit record.
+
+Not:
+
+> Agent says tests passed.
+
+Instead:
+
+```text
+QA_AGENT claimed: PASS
+Test runner exit code: 0
+Tests: 842 / 842 passed
+Commit: abc123
+Artifact hash: ...
+Timestamp: ...
+Environment: production candidate
+Evidence: attached
+```
+
+The certification engine evaluates the evidence.
+
+The agent does **not certify itself**.
+
+---
+
+# ZeroPolicy
+
+Models should never decide their own authority.
+
+Permissions belong in a deterministic broker.
+
+```text
+READ
+WRITE
+DELETE
+DEPLOY
+SEND_EMAIL
+CHARGE_CARD
+MERGE_PR
+MODIFY_DATABASE
+ROTATE_SECRET
+```
+
+Example:
+
+```ts
+{
+  agent: "backend",
+  action: "modify_database",
+  environment: "production",
+  policy: "approval-required"
+}
+```
+
+The model can request authority.
+
+It cannot manufacture authority.
+
+---
+
+# ZeroGate
+
+Every important transition has a gate.
+
+Example software release:
+
+```text
+CODE COMPLETE
+     ↓
+TYPECHECK
+     ↓
+UNIT TESTS
+     ↓
+INTEGRATION TESTS
+     ↓
+CRUD CERTIFICATION
+     ↓
+SECURITY
+     ↓
+MIGRATION SAFETY
+     ↓
+E2E
+     ↓
+PRODUCTION READINESS
+     ↓
+RELEASE
+```
+
+A failed gate blocks the next state.
+
+Not because the AI thinks it should.
+
+Because the state machine says it must.
+
+---
+
+# ZeroCert
+
+Certification is evidence-driven.
+
+Use evidence states such as:
+
+```text
+VERIFIED
+PARTIAL
+UNKNOWN
+FAILED
+```
+
+Example:
+
+```ts
+{
+  requirement: "Customer deletion works",
+  state: "VERIFIED",
+  evidence: {
+    test: "customer-delete.spec.ts",
+    executionId: "...",
+    response: 204,
+    databaseVerification: true
+  }
+}
+```
+
+No evidence = **UNKNOWN**, not success.
+
+---
+
+# ZeroState
+
+Agents never own canonical state.
+
+Canonical state lives outside inference.
+
+```text
+Database
+Event ledger
+Task graph
+Artifacts
+Evidence
+Memory graph
+Policies
+```
+
+AI receives a projection of that state.
+
+It does not become the state.
+
+This prevents the exact kind of agent drift you’ve been fighting.
+
+---
+
+# ZeroStack beneath ZeroAI
+
+ZeroAI should sit on top of your ZeroStack.
+
+```text
+┌────────────────────────────┐
+│          ZEROAI            │
+│ agents / memory / control  │
+├────────────────────────────┤
+│         ZEROSTACK          │
+│ Next.js full-stack runtime │
+├────────────────────────────┤
+│ Server Routes / Node       │
+│ ORM / SQL / Data APIs      │
+├────────────────────────────┤
+│ Postgres / Neon / Other DB │
+├────────────────────────────┤
+│ Vercel / Cloud / Selfhost  │
+└────────────────────────────┘
+```
+
+ZeroAI should remain database-, model-, and provider-agnostic.
+
+Models can include:
+
+```text
+OpenAI
+Anthropic
+Gemini
+local models
+specialized models
+future models
+```
+
+They are execution engines, not the architecture.
+
+---
+
+# BuildOS becomes the certification layer
+
+I would position the relationship like this:
+
+```text
+ZeroStack
+   Infrastructure
+
+ZeroAI
+   Intelligence runtime
+
+ZeroMemory
+   Durable cognitive state
+
+ZeroLedger
+   Tamper-evident execution history
+
+ZeroPolicy
+   Authority and permissions
+
+ZeroGate
+   Deterministic lifecycle gates
+
+BuildOS
+   Software construction + certification system
+```
+
+And collectively:
+
+# **The Zero Architecture**
+
+```text
+ZeroStack
+   +
+ZeroAI
+   +
+ZeroMemory
+   +
+ZeroLedger
+   +
+ZeroPolicy
+   +
+ZeroGate
+   +
+BuildOS
+```
+
+The core philosophy is extremely simple:
+
+> **Inference proposes.  
+> Deterministic systems decide.  
+> Evidence proves.  
+> Memory preserves.  
+> Policy authorizes.**
+
+That is the framework I would build everything else around.
