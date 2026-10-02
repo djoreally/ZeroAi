@@ -1,4 +1,4 @@
-import { TaskNodeSchema } from "@/lib/contracts";
+import { TaskNodeSchema } from "./contracts";
 import { z } from "zod";
 
 export const TaskGraphSchema = z.object({
