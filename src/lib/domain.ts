@@ -7,6 +7,15 @@ export type Workspace = {
   updatedAt:string;
 };
 
+export type WorkspaceMembership = {
+  workspaceId:string;
+  authUserId:string;
+  role:"owner"|"admin"|"member"|"viewer";
+  status:"active"|"invited"|"suspended";
+  createdAt:string;
+  updatedAt:string;
+};
+
 export type ApiKeyRecord = {
   id:string;
   workspaceId:string;
