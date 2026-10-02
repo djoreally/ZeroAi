@@ -1,4 +1,5 @@
 import { InterceptRequestSchema, compileIntercept } from "@/lib/runtime-r1";
+import { ProviderBindingRecordSchema, PROVIDER_BINDING_STATE_KEY } from "@/lib/provider-binding";
 import { authenticateWorkspaceRequest } from "@/lib/workspace-auth";
 import { getStore } from "@/lib/runtime-store";
 
@@ -25,7 +26,13 @@ export async function POST(request:Request){
       return Response.json({error:"WORKSPACE_NOT_FOUND"},{status:404});
     }
 
-    const envelope=compileIntercept(parsed.data);
+    const providerState=await store.getState(parsed.data.workspaceId,PROVIDER_BINDING_STATE_KEY);
+    const providerParsed=ProviderBindingRecordSchema.safeParse(providerState?.value);
+    if(!providerParsed.success){
+      return Response.json({error:"PROVIDER_NOT_CONNECTED"},{status:409});
+    }
+
+    const envelope=compileIntercept(parsed.data,providerParsed.data);
     return Response.json({
       intercepted:true,
       providerDispatched:false,
