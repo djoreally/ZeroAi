@@ -19,7 +19,8 @@ ZeroMemory does not automatically treat model output as truth. `/observe` only a
 Use a ZeroAI workspace API key with:
 
 - `memory:read` for context retrieval
-- `memory:write` for observation, supersession history, and consolidation
+- `memory:write` for observation / memory writes
+- both `memory:read` and `memory:write` for consolidation, because consolidation reads existing memory and writes derived memory
 
 Send it with the same API-key authentication mechanism used by the existing v1 BaaS endpoints.
 
@@ -92,7 +93,7 @@ ZeroPipe is deterministic. It performs active-state filtering, scope isolation, 
 
 Common durable phrases such as `remember`, `I prefer`, `we decided`, `our goal is`, durable constraints, and experience phrases such as `we tried`, `failed because`, or `resolved by` are conservatively recognized. Ordinary chatter is ignored.
 
-When a durable key changes, the current memory is updated but the previous value is preserved as an episodic supersession record. The brain therefore remembers that its belief changed without keeping stale state active in working memory.
+When a durable key changes, the current memory is updated but the previous value is preserved as an episodic supersession record. The write response exposes only the number of supersessions, not the previous memory value, so `memory:write` does not become a read channel.
 
 ## Explicit memories
 
@@ -173,6 +174,7 @@ await fetch(`${ZEROAI_URL}/api/v1/brain/observe`, {
 - deterministic supersession with episodic history
 - episodic memory with faster decay than durable decisions and constraints
 - deterministic repeated-experience consolidation
+- write-only credentials cannot recover prior memory values through observe
 - no automatic promotion of assistant output into durable truth
 - bounded working-memory capsules
 - existing Neon Data API persistence reused; no new database migration for this increment
