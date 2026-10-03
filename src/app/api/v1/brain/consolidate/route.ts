@@ -20,7 +20,7 @@ export async function POST(request:Request){
     const store=getStore();
     const auth=await authenticateRequest(request,store);
     if(!auth) return Response.json({error:"UNAUTHORIZED"},{status:401});
-    if(!hasScope(auth,"memory:write")) return Response.json({error:"FORBIDDEN"},{status:403});
+    if(!hasScope(auth,"memory:read") || !hasScope(auth,"memory:write")) return Response.json({error:"FORBIDDEN"},{status:403});
 
     const parsed=Body.safeParse(await request.json());
     if(!parsed.success) return Response.json({error:"INVALID_REQUEST",issues:parsed.error.issues},{status:422});
