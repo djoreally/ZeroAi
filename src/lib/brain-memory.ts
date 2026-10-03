@@ -221,6 +221,7 @@ export function consolidationCandidates(facts:MemoryFactRecord[],scope:BrainScop
   const groups=new Map<string,MemoryFactRecord[]>();
   for(const fact of facts){
     if(fact.invalidatedAt || !scopeMatches(fact.subject,scope) || !fact.predicate.startsWith("brain.episode.")) continue;
+    if(fact.predicate.startsWith("brain.episode.superseded-")) continue;
     const signature=episodeSignature(fact.object);
     if(!signature) continue;
     const group=groups.get(signature) ?? [];
