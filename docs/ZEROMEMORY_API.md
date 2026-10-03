@@ -9,6 +9,7 @@ The client owns its model. ZeroMemory owns durable memory selection and retrieva
 ```text
 message -> POST /api/v1/brain/context -> working-memory capsule -> client model
 client input/output -> POST /api/v1/brain/observe -> memory governor -> durable memory
+repeated episodes -> POST /api/v1/brain/consolidate -> higher-order durable facts
 ```
 
 ZeroMemory does not automatically treat model output as truth. `/observe` only auto-extracts conservative signals from user input. Applications can write explicit structured memories when they have authoritative data.
@@ -19,6 +20,7 @@ Use a ZeroAI workspace API key with:
 
 - `memory:read` for context retrieval
 - `memory:write` for observation / memory writes
+- both `memory:read` and `memory:write` for consolidation, because consolidation reads existing memory and writes derived memory
 
 Send it with the same API-key authentication mechanism used by the existing v1 BaaS endpoints.
 
@@ -39,7 +41,7 @@ Send it with the same API-key authentication mechanism used by the existing v1 B
 }
 ```
 
-Response:
+The response includes the bounded memory capsule plus ZeroPipe diagnostics showing how much dormant memory was scanned, scope-filtered, collapsed, ranked, and finally returned.
 
 ```json
 {
@@ -55,15 +57,24 @@ Response:
       "confidence": 0.92,
       "salience": 0.9,
       "score": 0.81,
+      "decay": 0.99,
       "updatedAt": "..."
     }
   ],
   "workingMemory": "[decision:current] ship Friday",
-  "count": 1
+  "count": 1,
+  "pipe": {
+    "scanned": 120,
+    "active": 118,
+    "scopeMatched": 27,
+    "supersededCollapsed": 3,
+    "ranked": 24,
+    "returned": 12
+  }
 }
 ```
 
-The current v1 context compiler is deliberately deterministic: scope filtering, supersession, lexical relevance, salience, confidence, and recency. Semantic/vector retrieval can be added behind this contract without changing client integrations.
+ZeroPipe is deterministic. It performs active-state filtering, scope isolation, supersession collapse, lexical relevance, salience, confidence, kind-specific decay, ranking, and context bounding before a model sees anything.
 
 ## Observe a turn
 
@@ -75,29 +86,14 @@ The current v1 context compiler is deliberately deterministic: scope filtering, 
     "userId": "user_123",
     "agentId": "assistant"
   },
-  "input": "Remember that the launch is Friday.",
+  "input": "We decided the launch is Friday.",
   "output": "Got it."
 }
 ```
 
-Common durable phrases such as `remember`, `I prefer`, `we decided`, `our goal is`, and durable constraints are conservatively recognized. Ordinary chatter is ignored.
+Common durable phrases such as `remember`, `I prefer`, `we decided`, `our goal is`, durable constraints, and experience phrases such as `we tried`, `failed because`, or `resolved by` are conservatively recognized. Ordinary chatter is ignored.
 
-Response:
-
-```json
-{
-  "storedCount": 1,
-  "inferredCount": 1,
-  "ignored": false,
-  "stored": [
-    {
-      "kind": "fact",
-      "key": "remembered-...",
-      "value": "the launch is Friday"
-    }
-  ]
-}
-```
+When a durable key changes, the current memory is updated but the previous value is preserved as an episodic supersession record. The write response exposes only the number of supersessions, not the previous memory value, so `memory:write` does not become a read channel.
 
 ## Explicit memories
 
@@ -125,7 +121,24 @@ For authoritative application state, pass structured memories:
 }
 ```
 
-Writing the same scope + kind + key again uses the same stable memory ID and replaces the previous value. That gives v1 deterministic supersession without forcing the client to manage record IDs.
+Writing the same scope + kind + key again uses the same stable memory ID. The former value becomes an episode when it differs from the new value.
+
+## Episodic memory and decay
+
+ZeroMemory distinguishes experiences from durable knowledge. Episodes decay faster than decisions and constraints, so old experiences naturally lose attention unless they are repeatedly reinforced. Current half-life policy is deterministic and can evolve without changing the public API.
+
+## Consolidation
+
+`POST /api/v1/brain/consolidate`
+
+```json
+{
+  "scope": {"userId":"user_123"},
+  "minOccurrences": 3
+}
+```
+
+The first consolidation engine is intentionally conservative and deterministic. Repeated similar episodes are grouped and promoted into a durable fact only after the configured occurrence threshold is reached. This is the beginning of the `experience -> knowledge` path; future model-assisted consolidation can sit behind the same contract.
 
 ## Scope behavior
 
@@ -152,17 +165,20 @@ await fetch(`${ZEROAI_URL}/api/v1/brain/observe`, {
 });
 ```
 
-## v1 guarantees
+## Current guarantees
 
 - model-provider independent
 - workspace isolation through existing API-key tenancy
 - user/agent/project/session scopes
-- deterministic supersession for explicit memory keys
-- deterministic context reduction before model inference
+- deterministic ZeroPipe context reduction before model inference
+- deterministic supersession with episodic history
+- episodic memory with faster decay than durable decisions and constraints
+- deterministic repeated-experience consolidation
+- write-only credentials cannot recover prior memory values through observe
 - no automatic promotion of assistant output into durable truth
-- bounded context capsules
-- current Neon Data API persistence reused; no new database migration is required for this slice
+- bounded working-memory capsules
+- existing Neon Data API persistence reused; no new database migration for this increment
 
 ## Next increments
 
-The API contract is intentionally stable enough for later additions: semantic/vector retrieval, episodic consolidation, contradiction handling, decay, provenance expansion, background consolidation, and model-assisted extraction.
+The public contracts remain stable for semantic/vector retrieval, richer contradiction graphs, provenance expansion, scheduled self-consolidation, salience reinforcement, explicit forgetting, and optional model-assisted extraction/consolidation.

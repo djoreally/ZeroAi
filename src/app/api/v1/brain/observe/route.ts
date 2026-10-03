@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { authenticateRequest,hasScope } from "../../../../../lib/auth";
-import { inferMemories,memoryPredicate,scopeSubject,stableMemoryId } from "../../../../../lib/brain-memory";
+import { findSupersededFact,inferMemories,memoryPredicate,scopeSubject,stableMemoryId,supersessionEpisode } from "../../../../../lib/brain-memory";
 import { getStore } from "../../../../../lib/runtime-store";
 
 const Scope=z.object({
@@ -37,14 +37,40 @@ export async function POST(request:Request){
 
     const inferred=parsed.data.input ? inferMemories(parsed.data.input) : [];
     const explicit=parsed.data.memories ?? [];
-    const candidates=[...inferred,...explicit];
+    const deduped=new Map<string,(typeof inferred)[number]>();
+    for(const candidate of [...inferred,...explicit]) deduped.set(`${candidate.kind}:${candidate.key}`,candidate);
+    const candidates=[...deduped.values()];
     const subject=scopeSubject(parsed.data.scope);
     const now=new Date().toISOString();
+    const currentFacts=await store.listMemoryFacts(auth.workspaceId,5000);
     const stored=[] as Array<{id:string;kind:string;key:string;value:string;confidence:number;salience:number}>;
+    let supersededCount=0;
 
     for(const candidate of candidates){
       const predicate=memoryPredicate(candidate.kind,candidate.key);
       const id=stableMemoryId(auth.workspaceId,subject,predicate);
+      const previous=findSupersededFact(currentFacts,subject,candidate);
+
+      if(previous){
+        const episode=supersessionEpisode(previous,candidate);
+        const episodePredicate=memoryPredicate(episode.kind,episode.key);
+        const episodeId=stableMemoryId(auth.workspaceId,subject,episodePredicate);
+        await store.upsertMemoryFact({
+          id:episodeId,
+          workspaceId:auth.workspaceId,
+          subject,
+          predicate:episodePredicate,
+          object:episode.value,
+          confidence:episode.confidence,
+          salience:episode.salience,
+          validFrom:now,
+          createdAt:now,
+          updatedAt:now
+        });
+        supersededCount++;
+      }
+
+      const existing=currentFacts.find(fact=>fact.id===id);
       await store.upsertMemoryFact({
         id,
         workspaceId:auth.workspaceId,
@@ -53,8 +79,8 @@ export async function POST(request:Request){
         object:candidate.value,
         confidence:candidate.confidence,
         salience:candidate.salience,
-        validFrom:now,
-        createdAt:now,
+        validFrom:previous ? now : (existing?.validFrom ?? now),
+        createdAt:existing?.createdAt ?? now,
         updatedAt:now
       });
       stored.push({id,kind:candidate.kind,key:candidate.key,value:candidate.value,confidence:candidate.confidence,salience:candidate.salience});
@@ -65,6 +91,7 @@ export async function POST(request:Request){
       scope:parsed.data.scope,
       stored,
       storedCount:stored.length,
+      supersededCount,
       inferredCount:inferred.length,
       ignored:stored.length===0
     },{status:stored.length ? 201 : 200});
