@@ -37,10 +37,12 @@ export async function POST(request:Request){
 
     const inferred=parsed.data.input ? inferMemories(parsed.data.input) : [];
     const explicit=parsed.data.memories ?? [];
-    const candidates=[...inferred,...explicit];
+    const deduped=new Map<string,(typeof inferred)[number]>();
+    for(const candidate of [...inferred,...explicit]) deduped.set(`${candidate.kind}:${candidate.key}`,candidate);
+    const candidates=[...deduped.values()];
     const subject=scopeSubject(parsed.data.scope);
     const now=new Date().toISOString();
-    const currentFacts=await store.listMemoryFacts(auth.workspaceId,2000);
+    const currentFacts=await store.listMemoryFacts(auth.workspaceId,5000);
     const stored=[] as Array<{id:string;kind:string;key:string;value:string;confidence:number;salience:number}>;
     const superseded=[] as Array<{previous:string;next:string;kind:string;key:string;episodeId:string}>;
 
@@ -77,7 +79,7 @@ export async function POST(request:Request){
         object:candidate.value,
         confidence:candidate.confidence,
         salience:candidate.salience,
-        validFrom:existing?.validFrom ?? now,
+        validFrom:previous ? now : (existing?.validFrom ?? now),
         createdAt:existing?.createdAt ?? now,
         updatedAt:now
       });
