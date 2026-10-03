@@ -202,9 +202,10 @@ export function findSupersededFact(facts:MemoryFactRecord[],subject:string,candi
 
 export function supersessionEpisode(previous:MemoryFactRecord,candidate:BrainMemoryCandidate):BrainMemoryCandidate{
   const value=`Previously ${candidate.kind}:${candidate.key} = ${previous.object}. Superseded by ${candidate.value}.`;
+  const transition=fingerprint(`${previous.object}\u0000${candidate.value}\u0000${previous.updatedAt}`);
   return {
     kind:"episode",
-    key:`superseded-${candidate.kind}-${cleanKey(candidate.key)}-${fingerprint(previous.object)}`,
+    key:`superseded-${candidate.kind}-${cleanKey(candidate.key)}-${transition}`,
     value,
     confidence:Math.min(previous.confidence,candidate.confidence),
     salience:Math.max(0.65,Math.min(0.95,candidate.salience))
