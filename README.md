@@ -4,6 +4,18 @@
 
 > **Inference proposes. Deterministic systems decide. Evidence proves. Memory preserves. Policy authorizes.**
 
+## ZeroMemory — standalone brain API
+
+ZeroMemory can now be consumed independently of the rest of the ZeroAI control plane. A chat app, CRM, agent, or SaaS product can retrieve a bounded working-memory capsule before calling its own model, then send the completed turn back for selective durable memory.
+
+- `POST /api/v1/brain/context` — retrieve relevant working memory
+- `POST /api/v1/brain/observe` — selectively persist durable memory
+- provider independent — the client keeps its own OpenAI, Claude, Gemini, local, or other model
+- scoped by workspace + user, with optional agent, project, and session boundaries
+- deterministic filtering/supersession before model inference
+
+See [`docs/ZEROMEMORY_API.md`](docs/ZEROMEMORY_API.md).
+
 ## Five planes
 
 | Plane | Owns |
@@ -17,7 +29,7 @@
 ## Core systems
 
 - **ZeroState** — canonical state outside inference
-- **ZeroMemory** — smallest-sufficient active memory
+- **ZeroMemory** — smallest-sufficient active memory and standalone brain API
 - **ZeroLedger** — append-only tamper-evident execution history
 - **ZeroPolicy** — deterministic authority broker
 - **ZeroGate** — lifecycle state-machine gates
@@ -54,7 +66,7 @@ The model may propose actions. It never becomes canonical state, grants its own 
 
 ## BaaS surface
 
-ZeroAI now includes workspace tenancy, API-key scopes, canonical state, policy evaluation, ZeroLedger streams, ZeroMemory facts, executions, evidence, and persisted certification.
+ZeroAI includes workspace tenancy, API-key scopes, canonical state, policy evaluation, ZeroLedger streams, ZeroMemory facts and brain endpoints, executions, evidence, and persisted certification.
 
 Production persistence is backed by Neon Data API through the provider-agnostic `ZeroStore` interface. See `docs/BAAS.md` and `docs/NEON_PRODUCTION.md`.
 
