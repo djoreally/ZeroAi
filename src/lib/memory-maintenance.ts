@@ -1,5 +1,5 @@
 import type { MemoryFactRecord } from "./domain";
-import { consolidationCandidates,memoryDecay,scopeMatches,type BrainMemoryCandidate,type BrainScope } from "./brain-memory";
+import { consolidationCandidates,memoryDecay,scopeSubject,type BrainMemoryCandidate,type BrainScope } from "./brain-memory";
 
 export type MemoryMaintenanceOptions={
   minOccurrences?:number;
@@ -35,7 +35,8 @@ export function planMemoryMaintenance(
   const nowMs=options.nowMs ?? Date.now();
   const minOccurrences=options.minOccurrences ?? 3;
   const decayThreshold=options.decayThreshold ?? 0.08;
-  const scoped=facts.filter(fact=>!fact.invalidatedAt && scopeMatches(fact.subject,scope));
+  const targetSubject=scopeSubject(scope);
+  const scoped=facts.filter(fact=>!fact.invalidatedAt && fact.subject===targetSubject);
   const episodes=scoped.filter(isEpisode);
   const consolidations=consolidationCandidates(scoped,scope,minOccurrences);
   const invalidations=episodes.filter(fact=>{
