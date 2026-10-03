@@ -42,13 +42,17 @@ describe("ZeroMemory autonomic maintenance",()=>{
     expect(plan.invalidations.map(item=>item.id)).toEqual(["old"]);
   });
 
-  it("does not maintain another user's memory",()=>{
+  it("does not maintain another user or inherited broader scope",()=>{
     const facts=[
       fact({id:"u1",subject:"scope:user=u1"}),
-      fact({id:"u2",subject:"scope:user=u2"})
+      fact({id:"u2",subject:"scope:user=u2"}),
+      fact({id:"workspace",subject:"scope:workspace"}),
+      fact({id:"agent",subject:"scope:user=u1;agent=assistant"})
     ];
-    const plan=planMemoryMaintenance(facts,{userId:"u1"},{nowMs:Date.parse("2026-10-01T00:00:00.000Z")});
-    expect(plan.stats.scoped).toBe(1);
+    const userPlan=planMemoryMaintenance(facts,{userId:"u1"},{nowMs:Date.parse("2026-10-01T00:00:00.000Z")});
+    expect(userPlan.stats.scoped).toBe(1);
+    const agentPlan=planMemoryMaintenance(facts,{userId:"u1",agentId:"assistant"},{nowMs:Date.parse("2026-10-01T00:00:00.000Z")});
+    expect(agentPlan.stats.scoped).toBe(1);
   });
 
   it("backs off when there is no maintenance work",()=>{
