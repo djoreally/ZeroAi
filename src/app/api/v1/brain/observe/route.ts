@@ -44,7 +44,7 @@ export async function POST(request:Request){
     const now=new Date().toISOString();
     const currentFacts=await store.listMemoryFacts(auth.workspaceId,5000);
     const stored=[] as Array<{id:string;kind:string;key:string;value:string;confidence:number;salience:number}>;
-    const superseded=[] as Array<{previous:string;next:string;kind:string;key:string;episodeId:string}>;
+    let supersededCount=0;
 
     for(const candidate of candidates){
       const predicate=memoryPredicate(candidate.kind,candidate.key);
@@ -67,7 +67,7 @@ export async function POST(request:Request){
           createdAt:now,
           updatedAt:now
         });
-        superseded.push({previous:previous.object,next:candidate.value,kind:candidate.kind,key:candidate.key,episodeId});
+        supersededCount++;
       }
 
       const existing=currentFacts.find(fact=>fact.id===id);
@@ -90,9 +90,8 @@ export async function POST(request:Request){
       workspaceId:auth.workspaceId,
       scope:parsed.data.scope,
       stored,
-      superseded,
       storedCount:stored.length,
-      supersededCount:superseded.length,
+      supersededCount,
       inferredCount:inferred.length,
       ignored:stored.length===0
     },{status:stored.length ? 201 : 200});
